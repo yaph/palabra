@@ -11,33 +11,48 @@ $CGI::POST_MAX=1024*100;  # max 100 KBytes posts
 $CGI::DISABLE_UPLOADS = 1;  # no uploads
 my $q = CGI->new();
 
-my $id = $q->param('id'); # id of word to edit
-my $word = $q->param('word'); # set language
-my $lang = $q->param('lang'); # set language
+my $word_id = $q->param('word_id');
+my $word = $q->param('word');
+my $lang = $q->param('lang');
 
 # check values
-die "'$id' is not accepted" unless $id =~ m/^\d+$/;
+die "'$word_id' is not accepted" unless $word_id =~ m/^\d+$/;
 die "'$lang' is not accepted" unless $lang =~ m/^\w\w_\w\w$/;
 
-my $p = Palabra->new(word => 'Edit description', lang => $lang);
+my $script = $q->url( -relative => 1 );
+
+# new Palabra object
+my $p = Palabra->new( word => $word,
+		      title => 'Edit description',
+		      lang => $lang,
+		      script => $script );
+
+$word = $p->trim_ws($word);
+die "Entry '$word' is not accepted" if $word eq '';
 
 # connect to MySQL database and get information for word.
 my $dbh = $p->db_connect();
-my $stmt = "SELECT * FROM $lang WHERE id = ? AND word = ? AND language = ?";
+my $stmt = "SELECT * FROM $lang WHERE word_id = ? AND word = ? AND lang = ?";
 my $sth = $dbh->prepare($stmt);
-$sth->execute($id, $word, $lang);
+$sth->execute($word_id, $word, $lang);
 my $ref = $sth->fetchrow_hashref();
 $sth->finish();
 $dbh->disconnect;
 
-# id doesn't exist
+# word_id doesn't exist
 die "Don't play around with query string" unless $ref;
 
 # stuff info into Palabra object
-$p->{id} = $id;
+$p->{word_id} = $word_id;
 $p->{word} = $word;
 $p->{lang} = $lang;
 $p->{description} = $ref->{description};
 
+# date and time
+my ($y, $m, $d, $h, $min, $s) = unpack("A4A2A2A2A2A2", $ref->{t});
+
 # print HTML edit page for word
-print $p->html_header(), $p->display_edit_form(), $p->html_footer();
+print $p->html_header(),
+    $q->p( "Last edited: $d.$m.$y $h:$min:$s" ),
+    $p->display_edit_form(), 
+    $p->html_footer();

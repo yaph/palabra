@@ -14,44 +14,48 @@ $CGI::DISABLE_UPLOADS = 1;  # no uploads
 my $q = CGI->new();
 my $lang = $q->param('lang');
 
-# locale settings
-use locale;
-use POSIX 'locale_h';
-setlocale(LC_CTYPE, $lang); # or die "Invalid locale";
+# check value
 die "'$lang' is not accepted" unless $lang =~ m/^\w\w_\w\w$/;
 
+# new Palabra object
 my $p = Palabra->new( lang => $lang );
-$p->{home_url} = sprintf( "index.cgi?lang=%s", $q->escape($lang) );
 
 # HTML header information
 my $author = 'Ramiro Gómez, ramiro@rahoo.de';
 my $css = '/style/palabra.css';
-my $home = 'palabra';
+my $home = 'Palabra';
+my $title = 'Contact Form';
 
 my @errors;
 my %formdata;
 
+my $home_url = sprintf( "index.cgi?lang=%s", $q->escape($lang) );
+
 # print top of the page
 print $q->header(), $q->start_html( 
-				    -title => $home,
+				    -title => $title,
 				    -meta => { copyright => "copyright 2003 $author" },
 				    -style=>{ src => $css }
 				    ),
-    $q->table( { -width => '100%', -class => 'top_bar' },
+    $q->table( { -width => '100%', -class => 'navbar' },
 	       $q->Tr(
-		      $q->td( { -class => 'left' }, $q->a( { -href => $p->{home_url} }, $p->{home} ), ' : ',  'Contact form' ), #  $q->td
+		      $q->td( { -class => 'left' }, $q->a( { -href => $home_url }, $home ), ' : ',  $title ),
 		      $q->td( { -class => 'right' }, $p->display_look_up_form($p->{lang}) )
-		      ) # $q->Tr
-	       ); # $q->table
+		      )
+	       );
     
 # main dispatch logic
-if ( $q->param('name') ) {
+if ( scalar( $q->param() ) > 1 ) {
     check_form();
     if (@errors) {
 	print $q->ul( $q->li(\@errors) ), display_mail_form();
     } else {
 	send_mail();
-	print $q->p('Thank you. The following data has been sent:'), $q->ul( $q->li( $formdata{name} ), $q->li( $formdata{email} ), $q->li( $formdata{subject} ), $q->li( $formdata{message} ) );
+	print $q->p('Thank you. The following data has been sent:'),
+	$q->ul( $q->li( $formdata{name} ),
+		$q->li( $formdata{email} ),
+		$q->li( $formdata{subject} ),
+		$q->li( $formdata{message} ) );
     }
     
 } else {
@@ -64,7 +68,7 @@ print $p->html_footer();
 # subroutines
 sub display_mail_form {
     return $q->p( 'Please fill in all fields!'),
-    $q->start_table( { width => '60%', cellpadding => '4%', style => 'table-layout:fixed' } ),
+    $q->start_table( { width => '40%', cellpadding => '4%', style => 'table-layout:fixed' } ),
     $q->start_form(),
     $q->hidden( -name => 'lang', -value => $p->{lang} ),
     $q->Tr( $q->td('Name:'), $q->td( $q->textfield( { name => 'name',
@@ -91,7 +95,7 @@ sub display_mail_form {
 							  )
 					    )
 		),
-	$q->Tr( $q->td( { -colspan => 2 }, $q->submit(),$q->reset() ) ),
+	$q->Tr( $q->td(), $q->td( $q->submit(), $q->reset() ) ),
 	$q->end_form(), $q->end_table();
 } # display_mail_form
 
