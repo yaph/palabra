@@ -22,12 +22,13 @@ my $p = Palabra->new( word => $word,
 
 $description = $p->trim_ws($description);
 my $dbh = $p->get_db_handle;
+my $table = $p->get_table_prefix . $lang;
 
 # check description using HTML::Parser
 $description = parse_html($description, $dbh);
 
 # update information for word
-$dbh->do("UPDATE $lang SET t = NOW(), description = ? WHERE word_id = ? AND word = ?", undef, $description, $word_id, $word );
+$dbh->do("UPDATE $table SET t = NOW(), description = ? WHERE word_id = ? AND word = ?", undef, $description, $word_id, $word );
 
 my $url = sprintf( "look_up.cgi?word_id=%d&lang=%s&word=%s", $word_id, $lang, $q->escape( $word ) ); 
 

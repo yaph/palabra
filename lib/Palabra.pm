@@ -25,6 +25,7 @@ my %palabra_defaults = (
 			script => '',
 			JavaScript => '',
 			nav_links => 0,
+			table_prefix => 'palabra_'
 			);
 
 sub new {
@@ -98,6 +99,10 @@ sub get_HTML_title {
     return (shift)->{title};
 }
 
+sub get_table_prefix {
+    return (shift)->{table_prefix};
+}
+
 sub set_HTML_title {
     my $self = shift;
     my $title = shift;
@@ -134,7 +139,36 @@ sub html_page {
     my $dbh = $self->get_db_handle;
     my $word = $self->{word};
     my $lang = $self->{lang};
+    my $translations = '';
 
+    my ($index_link, $edit_link, $tr_link);
+    if ($self->{nav_links}) {
+	my $word_id = $self->{word_id};
+	# links in navbar
+	my $edit_url = sprintf( "edit_word.cgi?word_id=%d;word=%s;lang=%s",
+				$word_id, $q->escape($word), $q->escape($lang) );
+	$edit_link =  '[' . $q->a( { -href => $edit_url }, $UI->{edit_desc_l} ) . ']';
+	my $tr_url = sprintf( "translate.cgi?word_id=%d;word=%s;lang=%s",
+			      $word_id, $q->escape($word), $q->escape($lang) );
+	$tr_link = '[' . $q->a( { -href => $tr_url }, $UI->{trans_l} ) . ']';
+	# determine which link not to show in navbar
+	if ($script eq 'edit_word.cgi') {
+	    $edit_link = $UI->{edit_desc_l};
+	    
+	} elsif ($script eq 'translate.cgi') {
+	    $tr_link = $UI->{trans_l};
+	}
+     	my $index_url = sprintf( "show_index.cgi?lang=%s", $q->escape($lang) );
+	$index_link = '[' . $q->a( { -href => $index_url }, $UI->{show_index_l} ) . ']';
+	
+	$translations .= $q->h4($UI->{trans_msg});
+	$translations .= $q->div( { -class => 'small' },
+				  $self->get_translations( dbh => $dbh,
+							   word_id => $word_id,
+							   lang => $lang )
+				  );
+	}
+    
     # HTML page
     my $HTML = $q->header;
     $HTML .= $q->start_html(
@@ -144,45 +178,18 @@ sub html_page {
 			    );
     $HTML .= $q->table( { -width => '100%', -class => 'navbar' },
 			$q->Tr(
-			       $q->td( { -class => 'left' }, $home_link, ' : ',  $word ),
+			       $q->td( { -class => 'left' }, $home_link, ' : ',  $word, $q->br,
+				       $edit_link, $index_link, $tr_link ),
 			       $q->td( { -class => 'right' }, $self->display_look_up_form($lang) )
 			       )
 			);
     $HTML .= $q->start_table( { -width => '100%' } );
     
-    my $translations = '';
-    if ($self->{nav_links}) {
-	my $word_id = $self->{word_id};
-	# links in navbar
-	my $edit_url = sprintf( "edit_word.cgi?word_id=%d;word=%s;lang=%s",
-				$word_id, $q->escape($word), $q->escape($lang) );
-	my $edit_link =  '[' . $q->a( { -href => $edit_url }, $UI->{edit_desc_l} ) . ']';
-	my $tr_url = sprintf( "translate.cgi?word_id=%d;word=%s;lang=%s",
-			      $word_id, $q->escape($word), $q->escape($lang) );
-	my $tr_link = '[' . $q->a( { -href => $tr_url }, $UI->{trans_l} ) . ']';
-	# determine which link not to show in navbar
-	if ($script eq 'edit_word.cgi') {
-	    $edit_link = $UI->{edit_desc_l};
-	    
-	} elsif ($script eq 'translate.cgi') {
-	    $tr_link = $UI->{trans_l};
-	}
-     	my $index_url = sprintf( "show_index.cgi?lang=%s", $q->escape($lang) );
-	my $index_link = '[' . $q->a( { -href => $index_url }, $UI->{show_index_l} ) . ']';
-	$HTML .= $q->Tr( $q->td( { -colspan => 2, -class => 'left' }, $edit_link, $index_link, $tr_link) );
-
-	$translations .= $q->h4($UI->{trans_msg});
-	$translations .= $q->div( { -class => 'small' },
-				  $self->get_translations( dbh => $dbh,
-							   word_id => $word_id,
-							   lang => $lang )
-				  );
-	}
-    
-    $HTML .= $q->Tr( $q->td( { -width => '70%' }, $html_page ),
-		     $q->td( { -width => '5%' }, ''),
-		     $q->td( { -width => '25%' }, $translations ) );
-    $HTML .= $q->end_table . $self->html_footer;
+    $HTML .= $q->Tr( $q->td( { -width => '70%', -valign => 'top' }, $html_page ),
+		     $q->td( { -width => '5%', -valign => 'top' }, ''),
+		     $q->td( { -width => '25%', -valign => 'top' }, $translations ) );
+    $HTML .= $q->end_table;
+    $HTML .= $self->html_footer;
     return $HTML;
 } # html_page
 
@@ -193,22 +200,15 @@ sub html_footer {
     my $UI = $self->get_UI;
     my $contact_url = sprintf( "contact.cgi?lang=%s", $q->escape($self->{lang}) );
     
-    my $HTML = $q->hr, $q->div( { -class => 'centersmall' },
-			'[' . $q->a( { -href => $contact_url }, $UI->{contact_l} ) . ']' .
-			'[' . $q->a( { -href => 'https://sourceforge.net/cvs/?group_id=83614' }, 'CVS' ). ']' .
-			'[' . $q->a( { -href => 'http://www.ramiro.org/palabra/README.html' }, $UI->{doc_l} ) . ']' .
-			'[' . $q->a( { -href => 'https://sourceforge.net/projects/palabra/' }, $UI->{project_info_l} ) . ']' .
-			$q->br . '&copy; Copyright 2003-2004' . $q->a( { -href => "http://www.ramiro.org/" }, 'Ramiro Gómez') . '.'
-			);
-    # sf.net logo
-    $HTML .= $q->a( { -href => 'http://sourceforge.net' },
-		    $q->img( { -src => 'http://sourceforge.net/sflogo.php?group_id=83614&amp;type=1',
-			       -width => 88,
-			       -height => 31,
-			       -alt => 'SourceForge.net Logo'
-			       }
-			     )
-		    ) . $q->end_html;
+    my $HTML = $q->hr . $q->div( { -class => 'centersmall' },
+				 '[' . $q->a( { -href => $contact_url }, $UI->{contact_l} ) . ']' .
+				 '[' . $q->a( { -href => 'https://sourceforge.net/cvs/?group_id=83614' }, 'CVS' ). ']' .
+				 '[' . $q->a( { -href => 'http://www.ramiro.org/palabra/README.html' }, $UI->{doc_l} ) . ']' .
+				 '[' . $q->a( { -href => 'https://sourceforge.net/projects/palabra/' }, $UI->{project_info_l} ) . ']' .
+				 $q->br . '&copy; Copyright 2003-2004' . 
+				 $q->a( { -href => "http://www.ramiro.org/" }, 'Ramiro Gómez') . '.'
+				 );
+    $HTML .= $q->end_html;
     $dbh->disconnect;
     return $HTML;
 } # html_footer
@@ -293,7 +293,8 @@ sub display_edit_form {
 sub get_allowed_tags {
     my $self = shift;
     my $dbh = $self->get_db_handle;
-    my $stmt = "SELECT tag FROM allowed_tags";
+    my $table = $self->get_table_prefix . 'allowed_tags';
+    my $stmt = "SELECT tag FROM $table";
     return $dbh->selectcol_arrayref( $stmt, { Columns=>[1] } );
 }
 
@@ -301,7 +302,8 @@ sub get_languages {
     my $self = shift;
     my $dbh = shift;
     my %lang;
-    my $stmt = "SELECT lang_code, lang_name FROM languages";
+    my $table = $self->get_table_prefix . 'languages';
+    my $stmt = "SELECT lang_code, lang_name FROM $table";
     my $sth = $dbh->prepare($stmt);
     $sth->execute;
     while ( my $row = $sth->fetchrow_hashref ) {
@@ -318,7 +320,7 @@ sub get_translations {
     my $dbh = $args{'dbh'};
     my $word_id = $args{'word_id'};
     my $lang = $args{'lang'};
-    my $tr_table= $lang . '_trans';
+    my $tr_table= $self->get_table_prefix . $lang . '_trans';
     my $UI = $self->get_UI;
     my $ref_lang = $self->get_languages($dbh);
 
@@ -350,9 +352,9 @@ sub add_word {
     my $dbh = $args{'dbh'};
     my $word = $args{'word'};
     my $lang = $args{'lang'};
-
+    my $table = $self->get_table_prefix . $lang;
     # Check if word exists, if not create new entry.
-    my $stmt = "SELECT * FROM $ lang WHERE word = ?";
+    my $stmt = "SELECT * FROM $table WHERE word = ?";
     my $sth = $dbh->prepare($stmt);
     $sth->execute($word);
     my $ref = $sth->fetchrow_hashref;
@@ -360,10 +362,10 @@ sub add_word {
 
     # create new entry for word in corresponding language table
     unless ($ref) {
-	$dbh->do("INSERT INTO $lang (word) VALUES(?)", undef, $word);
+	$dbh->do("INSERT INTO $table (word) VALUES(?)", undef, $word);
     
 	# get info for display
-	$stmt = "SELECT * FROM $lang WHERE word_id = LAST_INSERT_ID()";
+	$stmt = "SELECT * FROM $table WHERE word_id = LAST_INSERT_ID()";
 	$sth = $dbh->prepare($stmt);
 	$sth->execute;
 	$ref = $sth->fetchrow_hashref;

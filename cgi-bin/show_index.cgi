@@ -31,11 +31,12 @@ my $css = $p->get_css;
 
 # connect to DB
 my $dbh = $p->get_db_handle;
+my $table = $p->get_table_prefix . $lang;
 
 # get map of language codes and language names
 my $ref_lang = $p->get_languages($dbh);
 
-my $word_count = $dbh->selectrow_array("select count(*) from $lang");
+my $word_count = $dbh->selectrow_array("select count(*) from $table");
 
 my $lang_name = $ref_lang->{$lang};
 $title .= ' - ' . $lang_name;
@@ -77,7 +78,7 @@ sub get_list {
     # initially invoked get number of records matching letter
     if (!$start_pos) {
 	$start_pos = 0;
-	my $query = "SELECT COUNT(*) FROM $lang WHERE word REGEXP ?";
+	my $query = "SELECT COUNT(*) FROM $table WHERE word REGEXP ?";
 	$max_rec = $dbh->selectrow_array($query, undef, $regex);
 	return $UI->{no_entries_msg} unless $max_rec;
     }
@@ -123,7 +124,7 @@ sub get_list {
     $nav_link = join " ", map { "[$_]" } @nav_link;
     
     my $limit = "LIMIT $start_pos, $page_size";
-    my $stmt = "SELECT * FROM $lang WHERE word REGEXP ? ORDER BY word $limit";
+    my $stmt = "SELECT * FROM $table WHERE word REGEXP ? ORDER BY word $limit";
     my $sth = $dbh->prepare($stmt);
     $sth->execute($regex);
     while (my $ref = $sth->fetchrow_hashref) {

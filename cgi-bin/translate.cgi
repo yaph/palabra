@@ -31,7 +31,7 @@ $p->set_HTML_title($UI->{trans_l});
 
 my $dbh = $p->get_db_handle;
 # translation table
-my $tr_table= $lang . '_trans';
+my $tr_table= $p->get_table_prefix . $lang . '_trans';
 
 # get language hash reference
 my $ref_lang = $p->get_languages($dbh);

@@ -12,26 +12,6 @@ All users can edit descriptions of the chosen word. Descriptions may contain cer
 to structure the content. Disallowed tags are stripped. Users can add translations for existing
 words for all available languages.
 
-=head1 Todo
-
-=over
-
-=item * I18N, L10N
-
-=item * error handling
-
-=item * support for PostgreSQL
-
-=item * Documentation
-
-=item * generic browse function
-
-=item * statistics
-
-=item * Table Lock
-
-=back
-
 =head1 Requirements
 
 =over
@@ -48,16 +28,38 @@ words for all available languages.
 
 =item * CGI
 
-=item * CGI::Carp
-
 =item * DBI
 
 =item * DBD::mysql
 
 =item * HTML::Parser
 
+=item * Locale::Maketext
+
 =item * Net::SMTP
 
 =back
+
+=back
+
+=head1 Todo
+
+=over
+
+=item * I18N, L10N
+
+=item * Error handling
+
+=item * Support for PostgreSQL
+
+=item * Documentation
+
+=item * Generic browse function
+
+=item * Input validation
+
+=item * Statistics
+
+=item * Table Lock
 
 =back

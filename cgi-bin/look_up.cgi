@@ -21,7 +21,8 @@ my $p = Palabra->new( word => $word,
 
 # Check if word exists.
 my $dbh = $p->get_db_handle;
-my $stmt = "SELECT * FROM $lang WHERE word = ?";
+my $table = $p->get_table_prefix . $lang;
+my $stmt = "SELECT * FROM $table WHERE word = ?";
 my $sth = $dbh->prepare($stmt);
 $sth->execute($word);
 my $ref = $sth->fetchrow_hashref;

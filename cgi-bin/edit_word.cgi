@@ -22,12 +22,13 @@ my $p = Palabra->new( word_id => $word_id,
 		      word => $word,
 		      lang => $lang,
 		      script => $script );
+my $table = $p->get_table_prefix . $lang;
 my $UI = $p->get_UI;
 $p->set_HTML_title($UI->{edit_desc_l});
 
 # connect to MySQL database and get information for word.
 my $dbh = $p->get_db_handle;
-my $stmt = "SELECT * FROM $lang WHERE word_id = ? AND word = ?";
+my $stmt = "SELECT * FROM $table WHERE word_id = ? AND word = ?";
 my $sth = $dbh->prepare($stmt);
 $sth->execute($word_id, $word);
 my $ref = $sth->fetchrow_hashref;
