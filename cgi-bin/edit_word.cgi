@@ -22,7 +22,8 @@ die "'$lang' is not accepted" unless $lang =~ m/^\w\w_\w\w$/;
 my $script = $q->url( -relative => 1 );
 
 # new Palabra object
-my $p = Palabra->new( word => $word,
+my $p = Palabra->new( word_id => $word_id,
+		      word => $word,
 		      title => 'Edit description',
 		      lang => $lang,
 		      script => $script );
@@ -42,17 +43,14 @@ $dbh->disconnect;
 # word_id doesn't exist
 die "Don't play around with query string" unless $ref;
 
-# stuff info into Palabra object
-$p->{word_id} = $word_id;
-$p->{word} = $word;
-$p->{lang} = $lang;
-$p->{description} = $ref->{description};
-
 # date and time
 my ($y, $m, $d, $h, $min, $s) = unpack("A4A2A2A2A2A2", $ref->{t});
 
 # print HTML edit page for word
 print $p->html_header(),
     $q->p( "Last edited: $d.$m.$y $h:$min:$s" ),
-    $p->display_edit_form(), 
+    $p->display_edit_form( word_id => $word_id,
+			   word => $word,
+			   lang => $lang,
+			   description => $ref->{description} ),
     $p->html_footer();

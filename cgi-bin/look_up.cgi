@@ -42,13 +42,13 @@ unless ($ref) {
     $sth->execute();
     $ref = $sth->fetchrow_hashref();
     $sth->finish();
-    }
+}
 $dbh->disconnect();
 
-# stuff word_id into Palabra object needed for hidden field
+# stuff word_id into palabra object
+# !!! todo: write an accessor method !!!
 $p->{word_id} = $ref->{word_id};
+my $desc = $ref->{description} || "Please edit the description!";
 
-# print HTML page for word
-print $p->html_header();
-print $ref->{description} ? $ref->{description} : $p->display_edit_form();
-print $p->html_footer();
+# print page
+print $p->html_header(), $desc, $p->html_footer();

@@ -26,4 +26,4 @@ hr {width:70%;color:black}
 .navbar a:link {color:lime;font-family:'Nimbus Roman',serif;}
 .navbar a:hover	{color:#ff0000;text-decoration:none;}
 .navbar select {background-color:black;color:white;border-color:black;font-family:sans-serif;font-size:85%}
-.navbar input {background-color:black;color:white;border-color:black;font-family:sans-serif;font-size:85%}
+.navbar input {border-color:black;font-family:sans-serif;font-size:85%}

@@ -95,10 +95,11 @@ sub html_footer {
     my $contact_url = sprintf( "contact.cgi?lang=%s", $q->escape($self->{lang}) );
 
     return $q->div( { -class => 'centersmall' },
-		    '[', $q->a( { -href => $contact_url }, 'contact' ), ']',
-		    '[', $q->a( { -href => 'https://sourceforge.net/cvs/?group_id=83614' }, 'cvs' ), ']',
-		    '[', $q->a( { -href => 'http://www.ramiro.org/Palabra/README.html' }, 'docs' ), ']',
-		    '[', $q->a( { -href => 'https://sourceforge.net/projects/palabra/' }, 'project info' ), ']',
+		    '[', $q->a( { -href => $contact_url }, 'Contact' ), ']',
+		    '[', $q->a( { -href => 'https://sourceforge.net/cvs/?group_id=83614' }, 'CVS' ), ']',
+		    '[', $q->a( { -href => 'http://www.ramiro.org/palabra/README.html' }, 'Docs' ), ']',
+		    '[', $q->a( { -href => 'http://www.ramiro.org/download/palabra.tgz' }, 'Download' ), ']',
+		    '[', $q->a( { -href => 'https://sourceforge.net/projects/palabra/' }, 'Project info' ), ']',
 		    $q->br(), '&copy; Copyright 2003 ' . $self->{author} . '. All rights reserved!'
 		    ),
 			# sf.net logo
@@ -140,6 +141,11 @@ sub display_look_up_form {
 
 sub display_edit_form {
     my $self = shift;
+    my %args = @_;
+    my $word_id = $args{word_id};
+    my $word = $args{word};
+    my $lang = $args{lang};
+    my $description = $args{description};
 
     # get allowed tags
     my $dbh = $self->db_connect();
@@ -156,15 +162,15 @@ EOF
   
     return $q->h4('Edit description:' ),
     $q->start_form( -action => 'store_desc.cgi' ),
-    $q->hidden( -name => 'word_id', -value => $self->{word_id} ),
-    $q->hidden( -name => 'word', -value => $self->{word} ),
-    $q->hidden( -name => 'lang', -value => $self->{lang} ),
+    $q->hidden( -name => 'word_id', -value => $word_id ),
+    $q->hidden( -name => 'word', -value => $word ),
+    $q->hidden( -name => 'lang', -value => $lang ),
     $q->p( { -class => 'small' }, $info ),
     $q->p ( $q->textarea(
 			 -name => 'description',
 			 -rows => 16,
 			 -columns => 120,
-			 -value => $self->{description}
+			 -value => $description
 			 )
 	    ),
 	$q->p( $q->submit( -value => 'Store description' ) ),

@@ -55,8 +55,8 @@ if ( defined( $q->param('do') ) && $q->param('do') eq 'add_trans' ) { # add a tr
 	$dbh->do( "INSERT INTO $t SET word_id = ?, lang = ?, trans = ?", undef, $word_id, $tr_lang, $trans );
     }
 
-    # redirect to source word after update, to avoid reload problem
-    my $url = sprintf( "look_up.cgi?word_id=%s&lang=%s&word=%s", $word_id, $lang, $q->escape( $word ) ); 
+    # redirlect after insert, to avoid reload problem
+    my $url = sprintf( "translate.cgi?word_id=%d;word=%s;lang=%s", $word_id, $q->escape( $word ), $lang ); 
     print $q->redirect( $url );
 } else { # show translation if available
     print $p->html_header();

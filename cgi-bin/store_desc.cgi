@@ -37,7 +37,7 @@ $description = parse_html($description, $dbh);
 $dbh->do("UPDATE $lang SET t = NOW(), description = ? WHERE word_id = ? AND word = ?", undef, $description, $word_id, $word );
 $dbh->disconnect();
 
-my $url = sprintf( "look_up.cgi?word_id=%s&lang=%s&word=%s", $word_id, $lang, $q->escape( $word ) ); 
+my $url = sprintf( "look_up.cgi?word_id=%d&lang=%s&word=%s", $word_id, $lang, $q->escape( $word ) ); 
 
 # redirect to word
 print $q->redirect( $url );
