@@ -46,9 +46,17 @@ print $q->redirect('index.cgi') unless $ref;
 # date and time
 my ($y, $m, $d, $h, $min, $s) = unpack("A4A2A2A2A2A2", $ref->{t});
 
+# JavaScript code
+my $JavaScript = qq<
+    function add_tag(tag) {
+	window.document.edit_desc.description.value += tag;
+    }
+>;
+$p->set_script($JavaScript);
+
 # print HTML edit page for word
-print $p->html_header,
-    $q->p( $p->{UI}->{last_edit_msg} . ": $d.$m.$y $h:$min:$s" ),
+print $p->html_header(),
+    $q->p( $p->{UI}->{last_edit_msg} . " $d.$m.$y $h:$min:$s" ),
     $p->display_edit_form( word_id => $word_id,
 			   word => $word,
 			   lang => $lang,

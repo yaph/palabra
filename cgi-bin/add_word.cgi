@@ -45,10 +45,10 @@ sub display_add_word {
     my $home = 'Palabra';
     my $title = $p->{UI}->{add_word_b};
     my $home_url = sprintf( "index.cgi?lang=%s", $q->escape($lang) );
-    return $q->header(), $q->start_html( 
-					 -title => $title,
-					 -style=>{ src => $css }
-					 ),
+    return $q->header, $q->start_html( 
+				       -title => $title,
+				       -style=>{ src => $css }
+				       ),
     $q->table( { -width => '100%', -class => 'navbar' },
 	       $q->Tr(
 		      $q->td( { -class => 'left' },
@@ -57,7 +57,7 @@ sub display_add_word {
 		      $q->td( { -class => 'right' }, $p->display_look_up_form($lang) )
 		      )
 	       ),
-		   $q->h4('Add entry to: ', $ref_lang->{$lang}),
+		   $q->p($p->{UI}->{add_word_msg}, $ref_lang->{$lang}),
 		   $q->start_form( -action => 'add_word.cgi' ),
 		   $q->hidden( -name => 'word', -value => $word ),
 		   $q->hidden( -name => 'lang', -value => $lang ),
