@@ -1,6 +1,7 @@
 #!/usr/bin/perl -wT
 # Copyright 2003 Ramiro Gómez. All rights reserved!
-# This program is offered without warranty of any kind. See the file LICENSE for redistribution terms.
+# This program is offered without warranty of any kind.
+# See the file LICENSE for redistribution terms.
 use strict;
 use lib qw(/var/www/lib/perl /home/groups/p/pa/palabra/lib);
 use CGI;
@@ -30,9 +31,10 @@ my $p = Palabra->new( word_id => $word_id,
 		      lang => $lang, 
 		      tr_lang => $tr_lang,
 		      script => $script );
-$p->set_HTML_title( $p->{UI}->{trans_l}); 
+my $UI = $p->get_UI;
+$p->set_HTML_title($UI->{trans_l}); 
 
-my $dbh = $p->db_connect();
+my $dbh = $p->get_db_handle;
 # translation table
 my $tr_table= $lang . '_trans';
 
@@ -45,9 +47,9 @@ if ( defined( $q->param('do') ) && $q->param('do') eq 'add_trans' ) { # add a tr
     print $q->redirect('index.cgi') if ($trans eq '');
 
     # test whether specified translation already exists
-    my $stmt = "SELECT * FROM $tr_table WHERE word_id = ? AND trans = ?";
+    my $stmt = "SELECT * FROM $tr_table WHERE word_id = ? AND trans = ? AND lang = ?";
     my $sth = $dbh->prepare($stmt);
-    $sth->execute($word_id, $trans);
+    $sth->execute($word_id, $trans, $tr_lang);
     my $a_ref = $sth->fetchrow_arrayref();
 
     unless (defined($a_ref)) {
@@ -70,54 +72,34 @@ if ( defined( $q->param('do') ) && $q->param('do') eq 'add_trans' ) { # add a tr
     # redirect after insert, to avoid reload problem
     my $url = sprintf( "translate.cgi?word_id=%d;word=%s;lang=%s", $word_id, $q->escape( $word ), $lang ); 
     print $q->redirect( $url );
-} else { # show translation if available
-    print $p->html_header();
-
-    # get translation from DB
-    $word_id = $dbh->quote($word_id);
-    my $stmt = "SELECT trans, lang FROM $tr_table WHERE word_id = $word_id ORDER BY lang, trans";
-    my $sth = $dbh->prepare($stmt);
-    $sth->execute();
-    my $count;
-
-    while ( my $ref = $sth->fetchrow_hashref() ) {
-	my $trans = $ref->{trans};
-	my $lang = $ref->{lang};
-	my $lang_name = $ref_lang->{$lang};
-	my $url = sprintf( "look_up.cgi?word=%s&lang=%s", $q->escape( $trans ), $lang  ); 
-	print $q->p( $q->a( { -href => $url }, $trans ), ' - ', $q->small( $lang_name ) );
-	$count++;
-    }
-    $sth->finish();
-    $dbh->disconnect;
-    
-    $count || print $q->p( $p->{UI}->{no_trans_msg} );
-    
-    print display_add_trans();
+} else {
+    $p->set_nav_links;
+    my $page .= display_add_trans();
+    print $p->html_page($page);
 }
-
-print $p->html_footer();
 
 sub display_add_trans {
     delete $ref_lang->{$lang}; # delete source lang from hash
-    return $q->h3($p->{UI}->{add_trans_msg}),
-    $q->start_form(),
-    $q->popup_menu(
-		   -name => 'tr_lang',
-		   -values => [ sort keys %{$ref_lang} ],
-		   -labels => $ref_lang,
-		   -default => $lang
-		   ),
-		   $q->textfield(
-				 -name => 'trans',
-				 -override => 1,
-				 -size => 20,
-				 -maxlength => 80
-				 ),
-				 $q->hidden( -name => 'do', -value => 'add_trans' ),
-				 $q->hidden( -name => 'word', -value => $word ),
-				 $q->hidden( -name => 'word_id', -value => $word_id ),
-				 $q->hidden( -name => 'lang', -value => $lang ),
-				 $q->submit( -value => $p->{UI}->{add_trans_b} ),
-				 $q->end_form();
+    my $url = sprintf( "look_up.cgi?word=%s&lang=%s", $q->escape( $word ), $lang  ); 
+    my $link = $q->a( { -href => $url }, $word );
+    my $HTML = $q->p($UI->{add_trans_msg} . ' ' . $link) . $q->start_form();
+    $HTML .= $q->popup_menu(
+			    -name => 'tr_lang',
+			    -values => [ sort keys %{$ref_lang} ],
+			    -labels => $ref_lang,
+			    -default => $lang
+			    );
+    $HTML .= $q->textfield(
+			   -name => 'trans',
+			   -override => 1,
+			   -size => 20,
+			   -maxlength => 80
+			   );
+    $HTML .= $q->hidden( -name => 'do', -value => 'add_trans' );
+    $HTML .= $q->hidden( -name => 'word', -value => $word );
+    $HTML .= $q->hidden( -name => 'word_id', -value => $word_id );
+    $HTML .= $q->hidden( -name => 'lang', -value => $lang );
+    $HTML .= $q->submit( -value => $UI->{add_trans_b} );
+    $HTML .= $q->end_form();
+    return $HTML;
 } # sub display_add_trans

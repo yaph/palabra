@@ -1,6 +1,7 @@
 #!/usr/bin/perl -wT
 # Copyright 2003 Ramiro Gómez. All rights reserved!
-# This program is offered without warranty of any kind. See the file LICENSE for redistribution terms.
+# This program is offered without warranty of any kind.
+# See the file LICENSE for redistribution terms.
 use strict;
 use lib qw(/var/www/lib/perl /home/groups/p/pa/palabra/lib);
 use CGI;
@@ -19,93 +20,87 @@ print $q->redirect('index.cgi') unless $lang =~ m/^\w\w_\w\w$/;
 
 # new Palabra object
 my $p = Palabra->new( lang => $lang );
-
-# HTML header information
-my $title = $p->{UI}->{contact_l};
+my $UI = $p->get_UI;
+$p->set_HTML_title($UI->{contact_l});
+$p->{word} = $UI->{contact_l};
 
 my @errors;
 my %formdata;
 
-my $home_url = sprintf( "index.cgi?lang=%s", $q->escape($lang) );
-
-# print top of the page
-print $q->header, $q->start_html( 
-				    -title => $title,
-				    -style=>{ src => $p->{css} }
-				    ),
-    $q->table( { -width => '100%', -class => 'navbar' },
-	       $q->Tr(
-		      $q->td( { -class => 'left' }, $q->a( { -href => $home_url }, 'Palabra' ), ' : ',  $title ),
-		      $q->td( { -class => 'right' }, $p->display_look_up_form($p->{lang}) )
-		      )
-	       );
-    
 # main dispatch logic
 if ( scalar( $q->param ) > 1 ) {
     check_form();
     if (@errors) {
-	print $q->ul( $q->li(\@errors) ), display_mail_form();
+	my $page = $q->ul( $q->li(\@errors) ) . display_mail_form();
+	print $p->html_page($page);
     } else {
 	send_mail();
-	print $q->p( $q->{UI}->{send_mail_msg} ),
-	$q->ul( $q->li( $formdata{name} ),
-		$q->li( $formdata{email} ),
-		$q->li( $formdata{subject} ),
-		$q->li( $formdata{message} ) );
+	my $page = $q->p( $UI->{mail_sent_msg} );
+	$page .= $q->ul( $q->li( $formdata{name} ),
+			 $q->li( $formdata{email} ),
+			 $q->li( $formdata{subject} ),
+			 $q->li( $formdata{message} ) 
+			 );
+	print $p->html_page($page);
     }
 } else {
-    print display_mail_form();
+    my $page = display_mail_form();
+    print $p->html_page($page);
 }
-
-# print footer
-print $p->html_footer;
 
 # subroutines
 sub display_mail_form {
-    return $q->p( $p->{UI}->{mail_inst_msg} ),
-    $q->start_table( { width => '50%', cellpadding => '4%', style => 'table-layout:fixed' } ),
-    $q->start_form,
-    $q->hidden( -name => 'lang', -value => $p->{lang} ),
-    $q->Tr( $q->td( $p->{UI}->{name_f}), $q->td( $q->textfield( { name => 'name',
-						      size => 50,
-						      maxlength => 100 }
-						    )
-				     )
-	    ),
-	$q->Tr( $q->td($p->{UI}->{email_f}), $q->td( $q->textfield( { name => 'email',
-							   size => 50,
-							   maxlength => 100 } 
-							 )
-					  )
-		),
-	$q->Tr( $q->td($p->{UI}->{subject_f}), $q->td( $q->textfield( { name => 'subject',
-							     size => 50,
-							     maxlength => 100 }
-							   )
+    my $HTML = $q->p( $UI->{mail_inst_msg} );
+    $HTML .= $q->start_table( { width => '40%', cellpadding => '2%', style => 'table-layout:fixed' } );
+    $HTML .= $q->start_form;
+    $HTML .= $q->hidden( -name => 'lang', -value => $lang );
+    $HTML .= $q->Tr( $q->td( $UI->{name_f}), 
+		     $q->td( $q->textfield( { name => 'name',
+					      size => 50,
+					      maxlength => 100 }
 					    )
-		),
-	$q->Tr( $q->td($p->{UI}->{msg_f}), $q->td( $q->textarea( { name => 'message',
-							    rows => 10,
-							    columns => 50 }
-							  )
-						   )
-		),
-	$q->Tr( $q->td, $q->td( $q->submit( -value => $p->{UI}->{send_mail_b} ), $q->reset( -value => $p->{UI}->{reset_b} ) ) ),
-	$q->end_form, $q->end_table;
+			     )
+		     );
+    $HTML .= $q->Tr( $q->td($UI->{email_f}),
+		     $q->td( $q->textfield( { name => 'email',
+					      size => 50,
+					      maxlength => 100 } 
+					    )
+			     )
+		     );
+    $HTML .= $q->Tr( $q->td($UI->{subject_f}),
+		     $q->td( $q->textfield( { name => 'subject',
+					      size => 50,
+					      maxlength => 100 }
+					    )
+					    )
+		     );
+    $HTML .= $q->Tr( $q->td($UI->{msg_f}),
+		     $q->td( $q->textarea( { name => 'message',
+					     rows => 10,
+					     columns => 50 }
+					   )
+			     )
+		     );
+    $HTML .= $q->Tr( $q->td, $q->td( $q->submit( -value => $UI->{send_mail_b} ), 
+				     $q->reset( -value => $UI->{reset_b} ) ) 
+		     );
+    $HTML .= $q->end_form, $q->end_table;
+    return $HTML;
 } # display_mail_form
 
 sub check_form {
     my $name = $q->param('name');
     $name = $p->trim_ws($name);
     if ( !$name ) {
-	push @errors, "No name given!";
+	push @errors, $UI->{no_name_msg};
     } else {
 	$formdata{name} = $name;
     }
 
     my $email = $q->param('email');
     if ( ($email !~ m/^([\w\.-]+\@[\w.-]+[\w]+)$/) || (length($email) < 6) ) {
-	push @errors, " E-mail-address '$email' is not accepted!";
+	push @errors, $UI->{no_mail_msg};
     } else {
 	$email = $1;
 	$formdata{email} = $email;
@@ -113,7 +108,7 @@ sub check_form {
     
     my $subject = $q->param('subject');
     if ( $subject !~ m/^([\w.\s-]+)$/ ) {
-	push @errors, "Subject '$subject' is empty or contains disallowed characters!";
+	push @errors, $UI->{no_subject_msg};
     } else {
 	$subject = $1;
 	$formdata{subject} = $subject;
@@ -121,7 +116,7 @@ sub check_form {
 
     my $message = $q->param('message');
     if ( $message !~ m/^([\w\s\-\.,:!\?]+)$/ ) {
-	push @errors, "Message '$message' is empty or contains disallowed characters!";
+	push @errors, $UI->{no_message_msg};
     } else {
 	$message = $1;
 	$formdata{message} = $message;

@@ -26,19 +26,19 @@ my $p = Palabra->new( word_id => $word_id,
 		      word => $word,
 		      lang => $lang,
 		      script => $script );
-$p->set_HTML_title($p->{UI}->{edit_desc_l});
+my $UI = $p->get_UI;
+$p->set_HTML_title($UI->{edit_desc_l});
 
 $word = $p->trim_ws($word);
 print $q->redirect('index.cgi') if $word eq '';
 
 # connect to MySQL database and get information for word.
-my $dbh = $p->db_connect;
+my $dbh = $p->get_db_handle;
 my $stmt = "SELECT * FROM $lang WHERE word_id = ? AND word = ?";
 my $sth = $dbh->prepare($stmt);
 $sth->execute($word_id, $word);
 my $ref = $sth->fetchrow_hashref;
 $sth->finish;
-$dbh->disconnect;
 
 # word_id doesn't exist
 print $q->redirect('index.cgi') unless $ref;
@@ -52,13 +52,12 @@ my $JavaScript = qq<
 	window.document.edit_desc.description.value += tag;
     }
 >;
-$p->set_script($JavaScript);
+$p->set_JavaScript($JavaScript);
+$p->set_nav_links;
 
-# print HTML edit page for word
-print $p->html_header(),
-    $q->p( $p->{UI}->{last_edit_msg} . " $d.$m.$y $h:$min:$s" ),
+my $page = $q->p( $UI->{last_edit_msg} . " $d.$m.$y $h:$min:$s" ) .
     $p->display_edit_form( word_id => $word_id,
 			   word => $word,
 			   lang => $lang,
-			   description => $ref->{description} ),
-    $p->html_footer;
+			   description => $ref->{description} );
+print $p->html_page($page);

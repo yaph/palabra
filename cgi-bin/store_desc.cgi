@@ -28,14 +28,13 @@ $word = $p->trim_ws($word);
 print $q->redirect('index.cgi') if $word eq '';
 
 # connect to MySQL database
-my $dbh = $p->db_connect();
+my $dbh = $p->get_db_handle;
 
 # check description using HTML::Parser
 $description = parse_html($description, $dbh);
 
 # update information for word
 $dbh->do("UPDATE $lang SET t = NOW(), description = ? WHERE word_id = ? AND word = ?", undef, $description, $word_id, $word );
-$dbh->disconnect();
 
 my $url = sprintf( "look_up.cgi?word_id=%d&lang=%s&word=%s", $word_id, $lang, $q->escape( $word ) ); 
 
@@ -45,9 +44,7 @@ print $q->redirect( $url );
 # parse descriptions
 sub parse_html {
     my $text = shift;
-    my $dbh = shift;
-    
-    my $ref_allowed_tags = $p->get_allowed_tags($dbh);
+    my $ref_allowed_tags = $p->get_allowed_tags;
     
     use HTML::Parser;
     my $parser = HTML::Parser->new( api_version => 3,

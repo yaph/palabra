@@ -23,12 +23,14 @@ $lang = 'en_US' unless $lang =~ /^\w\w_\w\w$/;
 
 # new Palabra object
 my $p = Palabra->new(lang => $lang);
+my $title = $p->get_HTML_title;
+my $css = $p->get_css;
 
 print $q->header, $q->start_html( 
-				  -title => $p->{title},
-				  -style=>{ src => $p->{css} }
+				  -title => $title,
+				  -style=>{ src => $css }
 				  ),
-    $q->div( { -align => 'center', -valign => 'middle' }, $q->h2( $p->{title} ),
+    $q->div( { -align => 'center', -valign => 'middle' }, $q->h2( $title ),
 	     $p->display_look_up_form,
 	     ),
     $p->html_footer;

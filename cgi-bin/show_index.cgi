@@ -14,12 +14,12 @@ my $q = CGI->new;
 my $lang = $q->param('lang');
 my $letter = $q->param('letter');
 my $start_pos = $q->param('start_pos');
-my $page_size = 30;
+my $page_size = 15;
 my $max_rec = $q->param('max_rec');
 
 my @nav_link; # array which holds navigational links
 my $nav_link; # scalar to display navigational links
-my $max_links = 20; # max namuber of page links shown
+my $max_links = 20; # max number of page links shown
 
 # regex for matching the first letter ignoring case
 my $regex = '^[' .$letter . uc $letter . ']';
@@ -29,10 +29,12 @@ print $q->redirect('index.cgi') unless $letter =~ m/^[\w]?$/;
 print $q->redirect('index.cgi') unless $lang =~ m/^[\w-]+$/;
 
 my $p = Palabra->new( lang => $lang );
-my $title = $p->set_HTML_title( $p->{UI}->{show_index_l} );
+my $UI = $p->get_UI;
+my $title = $p->set_HTML_title( $UI->{show_index_l} );
+my $css = $p->get_css;
 
 # connect to DB
-my $dbh = $p->db_connect;
+my $dbh = $p->get_db_handle;
 
 # get map of language codes and language names
 my $ref_lang = $p->get_languages($dbh);
@@ -45,9 +47,9 @@ $title .= ' - ' . $lang_name;
 my $home_url = sprintf( "index.cgi?lang=%s", $q->escape($lang) );
 
 print $q->header, $q->start_html( 
-				    -title => $title,
-				    -style=>{ src => $p->{css} }
-				    ),
+				  -title => $title,
+				  -style=>{ src => $css }
+				  ),
     $q->table( { -width => '100%', -class => 'navbar' },
 	       $q->Tr(
 		      $q->td( { -class => 'left' },
@@ -56,14 +58,14 @@ print $q->header, $q->start_html(
 		      $q->td( { -class => 'right' }, $p->display_look_up_form($lang) )
 		      )
 	       ),
-    $q->p( $p->{UI}->{entry_total_msg} . ' ' . $word_count),
+    $q->p( $UI->{entry_total_msg} . ' ' . $word_count),
     $q->p( { -class => 'center' }, generate_alphabet() );
 
 # if letter is chosen
 if ($letter) { 
     my $word_list = get_list();
-    print $q->h3( $letter . " ($max_rec)" ), $word_list, $q->p( { -class => 'centersmall' }, $nav_link ) };
-
+    print $q->h4( $letter . " ($max_rec)" ), $word_list, $q->p( { -class => 'centersmall' }, $nav_link );
+}
 print $p->html_footer;
 
 sub generate_alphabet  {
@@ -81,15 +83,15 @@ sub get_list {
 	$start_pos = 0;
 	my $query = "SELECT COUNT(*) FROM $lang WHERE word REGEXP ?";
 	$max_rec = $dbh->selectrow_array($query, undef, $regex);
-	return $p->{UI}->{no_entries_msg} unless $max_rec;
+	return $UI->{no_entries_msg} unless $max_rec;
     }
 
     # generate links for navigating the listing
     # link to previous page
     if ($start_pos == 0) {
-	push @nav_link, $p->{UI}->{previous_l};
+	push @nav_link, $UI->{previous_l};
     } else {
-	push @nav_link, generate_nav_link($p->{UI}->{previous_l}, $start_pos - $page_size);
+	push @nav_link, generate_nav_link($UI->{previous_l}, $start_pos - $page_size);
     }
 	
     my $num_pages = $max_rec / $page_size;
@@ -116,9 +118,9 @@ sub get_list {
 	    
     # link to next page
     if ($start_pos + $page_size >= $max_rec) {
-	push @nav_link, $p->{UI}->{next_l};
+	push @nav_link, $UI->{next_l};
     } else {
-	push @nav_link, generate_nav_link($p->{UI}->{next_l}, $start_pos + $page_size);
+	push @nav_link, generate_nav_link($UI->{next_l}, $start_pos + $page_size);
     }
     
     # put links in square brackets
@@ -132,7 +134,7 @@ sub get_list {
 	my $info = '';
 	
 	unless ($ref->{description}) {
-	    $info = ' - ' . $q->span( { -class => 'small' }, $p->{UI}->{no_desc_msg} );
+	    $info = ' - ' . $q->span( { -class => 'small' }, $UI->{no_desc_msg} );
 	}
 	
 	my  $url = sprintf( "look_up.cgi?word_id=%d;word=%s;lang=%s", $ref->{word_id}, $q->escape($ref->{word}), $q->escape($lang) );

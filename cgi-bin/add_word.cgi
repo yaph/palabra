@@ -1,6 +1,7 @@
 #!/usr/bin/perl -wT
-# Copyright 2003 Ramiro Gómez. All rights reserved!
-# This program is offered without warranty of any kind. See the file LICENSE for redistribution terms.
+# Copyright 2003 Ramiro Gómez.
+# This program is offered without warranty of any kind.
+# See the file LICENSE for redistribution terms.
 use strict;
 use lib qw(/var/www/lib/perl /home/groups/p/pa/palabra/lib);
 use CGI;
@@ -23,7 +24,9 @@ my $p = Palabra->new( word => $word,
 $word = $p->trim_ws($word);
 print $q->redirect('index.cgi') if $word eq '';
 
-my $dbh = $p->db_connect;
+my $UI = $p->get_UI;
+my $dbh = $p->get_db_handle;
+my $title = '';
 
 # get language hash reference
 my $ref_lang = $p->get_languages($dbh);
@@ -36,39 +39,23 @@ if ( defined( $q->param('do') ) && $q->param('do') eq 'add_word' ) {
 		      $q->escape($word_id), $q->escape($word), $q->escape($lang));
     print $q->redirect($url);
 } else {
-    print display_add_word();
+    $title = $p->set_HTML_title($UI->{add_word_b});
+    my $page = display_add_word();
+    print $p->html_page($page);
 }
 
 sub display_add_word {
-    # HTML header information
-    my $css = '/style/palabra.css';
-    my $home = 'Palabra';
-    my $title = $p->{UI}->{add_word_b};
-    my $home_url = sprintf( "index.cgi?lang=%s", $q->escape($lang) );
-    return $q->header, $q->start_html( 
-				       -title => $title,
-				       -style=>{ src => $css }
-				       ),
-    $q->table( { -width => '100%', -class => 'navbar' },
-	       $q->Tr(
-		      $q->td( { -class => 'left' },
-			      $q->a( { -href => $home_url }, $home ), ' : ', $title,
-			      ),
-		      $q->td( { -class => 'right' }, $p->display_look_up_form($lang) )
-		      )
-	       ),
-		   $q->p($p->{UI}->{add_word_msg}, $ref_lang->{$lang}),
-		   $q->start_form( -action => 'add_word.cgi' ),
-		   $q->hidden( -name => 'word', -value => $word ),
-		   $q->hidden( -name => 'lang', -value => $lang ),
-		   $q->hidden( -name => 'do', -value => 'add_word' ),
-		   $q->p ( $q->textfield(
-					 -name => 'word',
-					 -size => 30,
-					 -default => $word
-					 ),
-			   $q->submit( -value => $title )
-			   ),
-			   $q->end_form,
-			   $p->html_footer;
+    my $HTML = $q->p($UI->{add_word_msg}, $ref_lang->{$lang});
+    $HTML .= $q->start_form( -action => 'add_word.cgi' );
+    $HTML .= $q->hidden( -name => 'word', -value => $word );
+    $HTML .= $q->hidden( -name => 'lang', -value => $lang );
+    $HTML .= $q->hidden( -name => 'do', -value => 'add_word' );
+    $HTML .= $q->textfield(
+			   -name => 'word',
+			   -size => 30,
+			   -default => $word
+			   );
+    $HTML .= $q->submit( -value => $title );
+    $HTML .= $q->end_form;
+    return $HTML;
 }
