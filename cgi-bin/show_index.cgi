@@ -74,58 +74,46 @@ sub get_list {
     }
 
     # generate links for navigating the listing
-    if ($max_rec > $page_size) {
+    #if ($max_rec > $page_size) {
 	
 	# link to previous page
-	if ($start_pos == 0) {
-	    push @nav_link, 'previous';
-	} else {
-	    push @nav_link, generate_nav_link('previous', $start_pos - $page_size);
-	}
-	
-	# links to individual pages
-	my $num_pages = $max_rec / $page_size;
-	
-	if ($num_pages > $max_links) { # more than $max_links pages
-	    my $min = ($start_pos - ($max_links / 2) * $page_size) / $page_size;
-	    
-	    if ($min < 0) {
-		$max_links += $min;
-		$min = 0;
-	    }
-	
-	    my $count = 0;
-	    for (my $i = $min * $page_size; $i < $max_rec && $count < $max_links; $i += $page_size) {
-		my $page_num = int( $i / $page_size ) + 1;
-		$count++;
-		if ($start_pos == $i) { # don't link current page
-		    push @nav_link, $page_num;
-		} else {
-		    push @nav_link, generate_nav_link($page_num, $i);
-		}
-	    }
-	    
-	} else { # less than $max_links pages
-	    for (my $i = 0; $i < $max_rec; $i += $page_size) {
-		my $page_num = int( $i / $page_size ) + 1;
-		if ($start_pos == $i) { # don't link current page
-		    push @nav_link, $page_num;
-		} else {
-		    push @nav_link, generate_nav_link($page_num, $i);
-		}
-	    }
-	}
-	
-	# link to next page
-	if ($start_pos + $page_size >= $max_rec) {
-	    push @nav_link, 'next';
-	} else {
-	    push @nav_link, generate_nav_link('next', $start_pos + $page_size);
-	}
-	
-	# put links in square brackets
-	$nav_link = join " ", map { "[$_]" } @nav_link;
+    if ($start_pos == 0) {
+	push @nav_link, 'previous';
+    } else {
+	push @nav_link, generate_nav_link('previous', $start_pos - $page_size);
     }
+	
+    my $num_pages = $max_rec / $page_size;
+    
+    # start position
+    my $min = ($start_pos - ($max_links / 2) * $page_size) / $page_size;
+    
+    if ($min < 0) {
+	$max_links += $min;
+	$min = 0;
+    }
+
+    # links to individual pages
+    my $count = 0;
+    for (my $i = $min * $page_size; $i < $max_rec && $count < $max_links; $i += $page_size) {
+	my $page_num = int( $i / $page_size ) + 1;
+	$count++;
+	if ($start_pos == $i) { # don't link current page
+	    push @nav_link, $page_num;
+	} else {
+	    push @nav_link, generate_nav_link($page_num, $i);
+	}
+    }
+	    
+    # link to next page
+    if ($start_pos + $page_size >= $max_rec) {
+	push @nav_link, 'next';
+    } else {
+	push @nav_link, generate_nav_link('next', $start_pos + $page_size);
+    }
+    
+    # put links in square brackets
+    $nav_link = join " ", map { "[$_]" } @nav_link;
     
     my $limit = "LIMIT $start_pos, $page_size";
     my $stmt = "SELECT * FROM $lang WHERE word REGEXP ? AND language = ? ORDER BY word $limit";
@@ -135,7 +123,7 @@ sub get_list {
 	my $info = '';
 	
 	unless ($ref->{description}) {
-	    $info = ' - <span class="small">No description yet</small>';
+	    $info = ' - ' . $q->span( { -class => 'small' }, 'No description yet' );
 	}
 	
 	my  $url = sprintf( "look_up.cgi?id=%d;word=%s;lang=%s", $ref->{id}, $q->escape($ref->{word}), $q->escape($lang) );
