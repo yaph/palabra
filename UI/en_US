@@ -35,6 +35,7 @@ no_desc_msg=No description yet
 no_entries_msg=No entries starting with this letter in the dictionary.
 entry_total_msg=Total number of entries:
 add_trans_msg=Add a translation:
+add_word_msg=Add word to
 
 # form elements
 name_f=Name:

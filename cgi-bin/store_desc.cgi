@@ -69,8 +69,15 @@ sub start {
     my ($parser, $tag, $attr) = @_;
     map {
 	if ($tag eq $_) {
+	    if ($tag eq 'a' && defined($attr->{href}) && $attr->{href} !~ /^look_up\.cgi/) {
+		$attr->{href} = '';
+	    }
 	    my $at = join " ",  map { $_ . '="' . $attr->{$_} . '"' } keys %$attr;
-	    $parser->{text} .= "<$tag $at>";
+	    if ($at) {
+		$parser->{text} .= "<$tag $at>";
+	    } else {
+		$parser->{text} .= "<$tag>";
+	    }
 	    return;
 	}
     } @{$parser->{ref_allowed_tags}};

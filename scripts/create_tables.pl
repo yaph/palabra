@@ -15,7 +15,7 @@ create_languages();
 $dbh->disconnect();
 
 sub create_allowed_tags {
-    my @allowed_tags = qw(dd dl dt em h1 h2 h3 h4 h5 h6 h7 li ol p strong table td tr ul);
+    my @allowed_tags = qw(a dd dl dt em h1 h2 h3 h4 h5 h6 h7 li ol p pre strong table td tr ul);
     my $create_tags =  q{ (
 			   id int(11) NOT NULL auto_increment,
 			   tag varchar(10) NOT NULL,
@@ -46,7 +46,6 @@ sub create_languages {
     my $create_lang = q{ (
 			  word_id int(11) NOT NULL auto_increment,
 			  word varchar(255) binary NOT NULL,
-			  lang varchar(255) NOT NULL,
 			  description text,
 			  t timestamp,
 			  PRIMARY KEY (word_id),

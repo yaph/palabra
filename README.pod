@@ -18,6 +18,10 @@ Palabra is a web-based dictionary that lets users edit and modify the descriptio
 
 =item * Documentation
 
+=item * generic browse function
+
+=item * Table Lock
+
 =back
 
 =head1 Requirements

@@ -18,6 +18,7 @@ my $db_user = "palabra";
 my $db_pass = "palabra";
 my $dsn = "DBI:mysql:host=$host_name;database=$db_name";
 my $UI_file_dir = '/var/www/palabra/UI/';
+my $JS_dir = '/var/www/palabra/js/';
 ################ Configuration END #####################
 
 ############### Constructor START ######################
@@ -25,7 +26,8 @@ my %palabra_defaults = (
 			css => '/style/palabra.css',
 			title => 'Palabra',
 			lang => 'en_US',
-			word => ''
+			word => '',
+			script => ''
 			);
 
 sub new {
@@ -70,11 +72,19 @@ sub set_word_id {
     return $word_id;
 }
 
+# set JavaScript
+sub set_script {
+    my $self = shift;
+    my $script = shift;
+    $self->{script} = $script;
+    return $script;
+}
+
 # Connect to MySQL server
 sub db_connect {
     my $self = shift;
     return( DBI->connect( $dsn, $db_user, $db_pass, { PrintError => 0, RaiseError => 1 } ) );
-} # sub db_connect
+}
 
 # Print standard HTML-header
 sub html_header {
@@ -107,8 +117,9 @@ sub html_header {
     my $home_link = $q->a( { -href => $home_url }, 'Palabra' );
 
     return $q->header, $q->start_html(
-					-title => $self->{title},
-					-style => { src => $self->{css} }
+				      -title => $self->{title},
+				      -style => { src => $self->{css} },
+				      -script => $self->{script}
 				      ),
     $q->table( { -width => '100%', -class => 'navbar' },
 	       $q->Tr(
@@ -180,11 +191,11 @@ sub display_edit_form {
     my $dbh = $self->db_connect;
     my $ref_allowed_tags = $self->get_allowed_tags($dbh);
     $dbh->disconnect;
-
-    my $info = $self->{UI}->{edit_desc_msg};
-    $info .= join ", ", map { '&lt;' . $_ . '&gt;' } @{$ref_allowed_tags};
-  
-    return $q->start_form( -action => 'store_desc.cgi' ),
+    my $info = $self->{UI}->{edit_desc_msg} . $q->br;
+    $info .= join ", ", map { '&lt;' . $q->a( { -href => "#add_tag",
+						-onClick => "add_tag('<$_></$_>')" }, $_ ) . '&gt;' } @{$ref_allowed_tags};
+    return $q->start_form( -action => 'store_desc.cgi',
+			   -name => 'edit_desc' ),
     $q->hidden( -name => 'word_id', -value => $word_id ),
     $q->hidden( -name => 'word', -value => $word ),
     $q->hidden( -name => 'lang', -value => $lang ),
@@ -206,7 +217,7 @@ sub get_allowed_tags {
     my $dbh = shift;
     my $stmt = "SELECT tag FROM allowed_tags";
     return $dbh->selectcol_arrayref( $stmt, { Columns=>[1] } );
-} # get_allowed_tags
+}
 
 sub get_languages { 
     my $self = shift;
@@ -225,7 +236,7 @@ sub get_languages {
 
 sub get_lang { 
     return (shift)->{lang};
-} # sub get_languages
+}
 
 # Add a new word to language table. Returns word_id
 sub add_word {

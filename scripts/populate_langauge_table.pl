@@ -18,7 +18,7 @@ open IN, $file or die "Cannot open $file for reading: $!";
 # read words and insert them into db
 while (<IN>) {
     chomp;
-    $dbh->do("INSERT IGNORE INTO $lang (word,lang) VALUES(?,?)", undef, $_, $lang);
+    $dbh->do("INSERT IGNORE INTO $lang (word) VALUES(?)", undef, $_);
 }
 close IN or die "Cannot close $file: $!";
 

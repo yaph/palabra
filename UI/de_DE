@@ -35,6 +35,7 @@ no_desc_msg=Keine Beschreibung vorhanden
 no_entries_msg=Bisher keine Einträge mit diesem Anfangsbuchstaben im Wörterbuch.
 entry_total_msg=Gesamtzahl der Einträge:
 add_trans_msg=Eine Übersetzung hinzufügen:
+add_word_msg=Wort hinzufügen für
 
 # form elements
 name_f=Name:
