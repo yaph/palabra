@@ -7,8 +7,8 @@ use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use Palabra;
 
-$CGI::POST_MAX=1024*100;  # max 100 KBytes posts
-$CGI::DISABLE_UPLOADS = 1;  # no uploads
+$CGI::POST_MAX=1024*100;
+$CGI::DISABLE_UPLOADS = 1;
 my $q = CGI->new();
 
 my $word_id = $q->param('word_id');
@@ -17,15 +17,15 @@ my $lang = $q->param('lang');
 my $description = $q->param('description');
 
 # check values
-die "'$word_id' is not accepted" unless $word_id =~ m/^\d+$/;
-die "'$lang' is not accepted" unless $lang =~ m/^\w\w_\w\w$/;
+print $q->redirect('index.cgi') unless $word_id =~ m/^\d+$/;
+print $q->redirect('index.cgi') unless $lang =~ m/^\w\w_\w\w$/;
 
 my $p = Palabra->new( word => $word,
 		      title => $word, 
 		      lang => $lang );
 
 $word = $p->trim_ws($word);
-die "Entry '$word' is not accepted" if $word eq '';
+print $q->redirect('index.cgi') if $word eq '';
 
 # connect to MySQL database
 my $dbh = $p->db_connect();
@@ -51,7 +51,7 @@ sub parse_html {
     
     use HTML::Parser;
     my $parser = HTML::Parser->new( api_version => 3,
-				    start_h => [ \&start, "self, tagname" ],
+				    start_h => [ \&start, "self, tagname, attr" ],
 				    text_h => [ \&text, "self, dtext" ],
 				    end_h   => [ \&end, "self, tagname" ],
 				    comment_h => [""]
@@ -66,10 +66,11 @@ sub parse_html {
 
 # Event handlers for HTML parser
 sub start {
-    my ($parser, $tag) = @_;
+    my ($parser, $tag, $attr) = @_;
     map {
 	if ($tag eq $_) {
-	    $parser->{text} .= "<$tag>";
+	    my $at = join " ",  map { $_ . '="' . $attr->{$_} . '"' } keys %$attr;
+	    $parser->{text} .= "<$tag $at>";
 	    return;
 	}
     } @{$parser->{ref_allowed_tags}};

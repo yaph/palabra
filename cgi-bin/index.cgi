@@ -7,8 +7,8 @@ use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use Palabra;
 
-$CGI::POST_MAX=1024*100;  # max 100 KBytes posts
-$CGI::DISABLE_UPLOADS = 1;  # no uploads
+$CGI::POST_MAX=1024*100;
+$CGI::DISABLE_UPLOADS = 1;
 my $q = CGI->new();
 
 # set language

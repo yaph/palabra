@@ -8,14 +8,14 @@ use CGI::Carp qw(fatalsToBrowser);
 use Net::SMTP;
 use Palabra;
 
-$CGI::POST_MAX=1024*100;  # max 100 KBytes posts
-$CGI::DISABLE_UPLOADS = 1;  # no uploads
+$CGI::POST_MAX=1024*100;
+$CGI::DISABLE_UPLOADS = 1;
 
 my $q = CGI->new();
 my $lang = $q->param('lang');
 
 # check value
-die "'$lang' is not accepted" unless $lang =~ m/^\w\w_\w\w$/;
+print $q->redirect('index.cgi') unless $lang =~ m/^\w\w_\w\w$/;
 
 # new Palabra object
 my $p = Palabra->new( lang => $lang );
@@ -57,7 +57,6 @@ if ( scalar( $q->param() ) > 1 ) {
 		$q->li( $formdata{subject} ),
 		$q->li( $formdata{message} ) );
     }
-    
 } else {
     print display_mail_form();
 }
@@ -139,7 +138,7 @@ sub send_mail {
     $smtp->recipient( 'ramiro@rahoo.de', { SkipBad => 1 } );
     $smtp->data();
     $smtp->datasend("From: $formdata{name} <$formdata{email}>\n");
-    $smtp->datasend("To: ramiro\@rahoo.de\n");
+    $smtp->datasend("To: web\@ramiro.org\n");
     $smtp->datasend("Subject: $formdata{subject}\n");
     $smtp->datasend("\n");
     $smtp->datasend($formdata{message});

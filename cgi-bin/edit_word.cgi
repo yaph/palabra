@@ -7,8 +7,8 @@ use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use Palabra;
 
-$CGI::POST_MAX=1024*100;  # max 100 KBytes posts
-$CGI::DISABLE_UPLOADS = 1;  # no uploads
+$CGI::POST_MAX=1024*100;
+$CGI::DISABLE_UPLOADS = 1;
 my $q = CGI->new();
 
 my $word_id = $q->param('word_id');
@@ -16,8 +16,8 @@ my $word = $q->param('word');
 my $lang = $q->param('lang');
 
 # check values
-die "'$word_id' is not accepted" unless $word_id =~ m/^\d+$/;
-die "'$lang' is not accepted" unless $lang =~ m/^\w\w_\w\w$/;
+print $q->redirect('index.cgi') unless $word_id =~ m/^\d+$/;
+print $q->redirect('index.cgi') unless $lang =~ m/^\w\w_\w\w$/;
 
 my $script = $q->url( -relative => 1 );
 
@@ -29,19 +29,19 @@ my $p = Palabra->new( word_id => $word_id,
 		      script => $script );
 
 $word = $p->trim_ws($word);
-die "Entry '$word' is not accepted" if $word eq '';
+print $q->redirect('index.cgi') if $word eq '';
 
 # connect to MySQL database and get information for word.
 my $dbh = $p->db_connect();
-my $stmt = "SELECT * FROM $lang WHERE word_id = ? AND word = ? AND lang = ?";
+my $stmt = "SELECT * FROM $lang WHERE word_id = ? AND word = ?";
 my $sth = $dbh->prepare($stmt);
-$sth->execute($word_id, $word, $lang);
+$sth->execute($word_id, $word);
 my $ref = $sth->fetchrow_hashref();
 $sth->finish();
 $dbh->disconnect;
 
 # word_id doesn't exist
-die "Don't play around with query string" unless $ref;
+print $q->redirect('index.cgi') unless $ref;
 
 # date and time
 my ($y, $m, $d, $h, $min, $s) = unpack("A4A2A2A2A2A2", $ref->{t});

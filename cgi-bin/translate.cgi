@@ -7,8 +7,8 @@ use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use Palabra;
 
-$CGI::POST_MAX=1024*100;  # max 100 KBytes posts
-$CGI::DISABLE_UPLOADS = 1;  # no uploads
+$CGI::POST_MAX=1024*100;
+$CGI::DISABLE_UPLOADS = 1;
 my $q = CGI->new();
 
 my $word_id = $q->param('word_id');
@@ -18,9 +18,9 @@ my $trans = $q->param('trans');
 my $tr_lang = $q->param('tr_lang');
 
 # check values
-die "'$word_id' is not accepted" unless $word_id =~ m/^\d+$/;
-die "'$lang' is not accepted" unless $lang =~ m/^\w\w_\w\w$/;
-die "'$tr_lang' is not accepted" unless ( !defined($tr_lang) || $tr_lang =~ m/^\w\w_\w\w$/ );
+print $q->redirect('index.cgi') unless $word_id =~ m/^\d+$/;
+print $q->redirect('index.cgi') unless $lang =~ m/^\w\w_\w\w$/;
+print $q->redirect('index.cgi') unless ( !defined($tr_lang) || $tr_lang =~ m/^\w\w_\w\w$/ );
 
 my $script = $q->url( -relative => 1 );
 
@@ -34,7 +34,7 @@ my $p = Palabra->new( word_id => $word_id,
 
 my $dbh = $p->db_connect();
 # translation table
-my $t = $lang . '_trans';
+my $tr_table= $lang . '_trans';
 
 # get language hash reference
 my $ref_lang = $p->get_languages($dbh);
@@ -42,20 +42,32 @@ my $ref_lang = $p->get_languages($dbh);
 if ( defined( $q->param('do') ) && $q->param('do') eq 'add_trans' ) { # add a translation
     # check whether translation was supplied
     $trans = $p->trim_ws($trans);
-    die "Entry '$trans' is not accepted" if ($trans eq '');
+    print $q->redirect('index.cgi') if ($trans eq '');
 
     # test whether specified translation already exists
-    my $stmt = "SELECT * FROM $t WHERE word_id = ? AND trans = ?";
+    my $stmt = "SELECT * FROM $tr_table WHERE word_id = ? AND trans = ?";
     my $sth = $dbh->prepare($stmt);
     $sth->execute($word_id, $trans);
     my $a_ref = $sth->fetchrow_arrayref();
 
     unless (defined($a_ref)) {
 	# translation does not exist, thus insert a new row into translation table
-	$dbh->do( "INSERT INTO $t SET word_id = ?, lang = ?, trans = ?", undef, $word_id, $tr_lang, $trans );
+	$dbh->do( "INSERT INTO $tr_table SET word_id = ?, lang = ?, trans = ?", undef, $word_id, $tr_lang, $trans );
+	
+	# add translation link from target to source
+	$tr_table =~ s/^\w\w_\w\w/$tr_lang/;
+	my $orig_trans = $trans;
+	my $orig_source_lang = $lang;
+	my $orig_target_lang = $tr_lang;
+	
+	# get word_id of original translation
+	my $word_id = $p->add_word( dbh => $dbh,
+				    word => $orig_trans,
+				    lang => $orig_target_lang );
+	$dbh->do( "INSERT IGNORE INTO $tr_table SET word_id = ?, lang = ?, trans = ?", undef, $word_id, $orig_source_lang, $word );
     }
-
-    # redirlect after insert, to avoid reload problem
+    
+    # redirect after insert, to avoid reload problem
     my $url = sprintf( "translate.cgi?word_id=%d;word=%s;lang=%s", $word_id, $q->escape( $word ), $lang ); 
     print $q->redirect( $url );
 } else { # show translation if available
@@ -63,7 +75,7 @@ if ( defined( $q->param('do') ) && $q->param('do') eq 'add_trans' ) { # add a tr
 
     # get translation from DB
     $word_id = $dbh->quote($word_id);
-    my $stmt = "SELECT trans, lang FROM $t WHERE word_id = $word_id ORDER BY lang, trans";
+    my $stmt = "SELECT trans, lang FROM $tr_table WHERE word_id = $word_id ORDER BY lang, trans";
     my $sth = $dbh->prepare($stmt);
     $sth->execute();
     my $count;

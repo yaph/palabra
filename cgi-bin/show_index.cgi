@@ -7,8 +7,8 @@ use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use Palabra;
 
-$CGI::POST_MAX=1024*100;  # max 100 KBytes posts
-$CGI::DISABLE_UPLOADS = 1;  # no uploads
+$CGI::POST_MAX=1024*100;
+$CGI::DISABLE_UPLOADS = 1;
 my $q = CGI->new();
 
 # HTML header information
@@ -31,8 +31,8 @@ my $max_links = 20; # max namuber of page links shown
 my $regex = '^[' .$letter . uc $letter . ']';
 
 # check values
-die "Entry '$letter' is not accepted" unless $letter =~ m/^[\w]?$/;
-die "Entry '$lang' is not accepted" unless $lang =~ m/^[\w-]+$/;
+print $q->redirect('index.cgi') unless $letter =~ m/^[\w]?$/;
+print $q->redirect('index.cgi') unless $lang =~ m/^[\w-]+$/;
 
 my $p = Palabra->new( lang => $lang );
 
@@ -41,6 +41,8 @@ my $dbh = $p->db_connect();
 
 # get map of language codes and language names
 my $ref_lang = $p->get_languages($dbh);
+
+my $word_count = $dbh->selectrow_array("select count(*) from $lang");
 
 my $lang_name = $ref_lang->{$lang};
 
@@ -55,10 +57,11 @@ print $q->header(), $q->start_html(
 	       $q->Tr(
 		      $q->td( { -class => 'left' },
 			      $q->a( { -href => $home_url }, $home ), ' : ', $title,
-			      $q->br(), $lang_name ),
+			      ),
 		      $q->td( { -class => 'right' }, $p->display_look_up_form($lang) )
 		      )
 	       ),
+    $q->p( $lang_name . ': ' . $word_count),
     $q->p( { -class => 'center' }, generate_alphabet() );
 
 # if letter is chosen
@@ -70,7 +73,7 @@ sub generate_alphabet  {
     return join " - ", map { 
 	my $url = sprintf( "show_index.cgi?letter=%s;lang=%s", $q->escape($_), $q->escape($lang) );
 	$q->a( { -href => $url }, $_ );
-	} ('a'..'z');
+    } ('a'..'z');
 } # sub generate_alphabet
 
 sub get_list {
@@ -127,9 +130,9 @@ sub get_list {
     $nav_link = join " ", map { "[$_]" } @nav_link;
     
     my $limit = "LIMIT $start_pos, $page_size";
-    my $stmt = "SELECT * FROM $lang WHERE word REGEXP ? AND lang = ? ORDER BY word $limit";
+    my $stmt = "SELECT * FROM $lang WHERE word REGEXP ? ORDER BY word $limit";
     my $sth = $dbh->prepare($stmt);
-    $sth->execute($regex, $lang);
+    $sth->execute($regex);
     while (my $ref = $sth->fetchrow_hashref()) {
 	my $info = '';
 	

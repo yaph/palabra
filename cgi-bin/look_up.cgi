@@ -7,14 +7,14 @@ use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use Palabra;
 
-$CGI::POST_MAX=1024*100;  # max 100 KBytes posts
-$CGI::DISABLE_UPLOADS = 1;  # no uploads
+$CGI::POST_MAX=1024*100;
+$CGI::DISABLE_UPLOADS = 1;
 my $q = CGI->new();
 
 my $lang = $q->param('lang');
 my $word = $q->param('word');
 
-die "Entry '$lang' is not accepted" unless $lang =~ m/^\w\w_\w\w$/;
+print $q->redirect('index.cgi') unless $lang =~ m/^\w\w_\w\w$/;
 
 # new Palabra object
 my $p = Palabra->new( word => $word,
@@ -22,26 +22,21 @@ my $p = Palabra->new( word => $word,
 		      lang => $lang);
 
 $word = $p->trim_ws($word);
-die "Entry '$word' is not accepted" if $word eq '';
+print $q->redirect('index.cgi') if $word eq '';
 
 # connect to MySQL database. Check if word exists, if not create new entry.
 my $dbh = $p->db_connect();
-my $stmt = "SELECT * FROM $lang WHERE word = ? AND lang = ?";
+my $stmt = "SELECT * FROM $lang WHERE word = ?";
 my $sth = $dbh->prepare($stmt);
-$sth->execute($word, $lang);
+$sth->execute($word);
 my $ref = $sth->fetchrow_hashref();
 $sth->finish();
 
 # create new entry for word in corresponding language table
 unless ($ref) {
-    $dbh->do("INSERT INTO $lang (word,lang) VALUES(?,?)", undef, $word, $lang);
-    
-    # get info for display
-    $stmt = "SELECT * FROM $lang WHERE word_id = LAST_INSERT_ID()";
-    $sth = $dbh->prepare($stmt);
-    $sth->execute();
-    $ref = $sth->fetchrow_hashref();
-    $sth->finish();
+    # redirect to add word form
+    my $url = sprintf( "add_word.cgi?word=%s;lang=%s", $q->escape( $word ), $lang ); 
+    print $q->redirect( $url );
 }
 $dbh->disconnect();
 
