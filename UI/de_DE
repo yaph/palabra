@@ -1,0 +1,43 @@
+# define strings for UI components
+# *_b = button
+# *_l = link text
+# *_msg = message
+
+# Do not change the keys unless
+# you know what you are doing.
+
+# Strings on buttons
+add_word_b=Wort hinzufügen
+add_trans_b=Übersetzung hinzufügen
+edit_desc_b=Beschreibung bearbeiten
+store_desc_b=Beschreibung speichern
+send_mail_b=Senden
+reset_b=Zurücksetzen
+look_up_b=Eintrag suchen
+
+# link texts
+edit_desc_l=Beschreibung bearbeiten
+show_index_l=Übersicht
+trans_l=Übersetzen
+contact_l=Kontakt
+project_info_l=Projektinfo
+doc_l=Doku
+previous_l=Zurück
+next_l=Weiter
+
+# Messages to users
+edit_desc_msg=Nur folgende HTML-Tags können in Beschreibungen verwendet werden:
+last_edit_msg=Zuletzt geändert:
+mail_inst_msg=Alle Felder ausfüllen.
+mail_sent_msg=Danke. Folgende Daten wurden gesendet:
+no_trans_msg=Keine Übersetzungen gefunden.
+no_desc_msg=Keine Beschreibung vorhanden
+no_entries_msg=Bisher keine Einträge mit diesem Anfangsbuchstaben im Wörterbuch.
+entry_total_msg=Gesamtzahl der Einträge:
+add_trans_msg=Eine Übersetzung hinzufügen:
+
+# form elements
+name_f=Name:
+email_f=E-Mail:
+subject_f=Betreff:
+msg_f=Nachricht:

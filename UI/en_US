@@ -1,0 +1,43 @@
+# define strings for UI components
+# *_b = button
+# *_l = link text
+# *_msg = message
+
+# Do not change the keys unless
+# you know what you are doing.
+
+# Strings on buttons
+add_word_b=Add word
+add_trans_b=Add translation
+edit_desc_b=Edit description
+store_desc_b=Store description
+send_mail_b=Send
+reset_b=Reset
+look_up_b=Look up
+
+# link texts
+edit_desc_l=Edit description
+show_index_l=Show index
+trans_l=Translations
+contact_l=Contact
+project_info_l=Project info
+doc_l=Doc
+previous_l=Previous
+next_l=Next
+
+# Messages to users
+edit_desc_msg=Please use only the following HTML tags in descriptions of meaning:
+last_edit_msg=Last edited:
+mail_inst_msg=Please fill in all fields.
+mail_sent_msg=Thank you. The following data has been sent:
+no_trans_msg=No translations were found.
+no_desc_msg=No description yet
+no_entries_msg=No entries starting with this letter in the dictionary.
+entry_total_msg=Total number of entries:
+add_trans_msg=Add a translation:
+
+# form elements
+name_f=Name:
+email_f=Email:
+subject_f=Subject:
+msg_f=Message:

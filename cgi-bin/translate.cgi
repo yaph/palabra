@@ -27,10 +27,10 @@ my $script = $q->url( -relative => 1 );
 # new Palabra object
 my $p = Palabra->new( word_id => $word_id,
 		      word => $word,
-		      title => 'Translations', 
 		      lang => $lang, 
 		      tr_lang => $tr_lang,
 		      script => $script );
+$p->set_HTML_title( $p->{UI}->{trans_l}); 
 
 my $dbh = $p->db_connect();
 # translation table
@@ -91,7 +91,7 @@ if ( defined( $q->param('do') ) && $q->param('do') eq 'add_trans' ) { # add a tr
     $sth->finish();
     $dbh->disconnect;
     
-    $count || print $q->p('No translations were found.');
+    $count || print $q->p( $p->{UI}->{no_trans_msg} );
     
     print display_add_trans();
 }
@@ -100,7 +100,7 @@ print $p->html_footer();
 
 sub display_add_trans {
     delete $ref_lang->{$lang}; # delete source lang from hash
-    return $q->h3('Add a translation:'),
+    return $q->h3($p->{UI}->{add_trans_msg}),
     $q->start_form(),
     $q->popup_menu(
 		   -name => 'tr_lang',
@@ -118,6 +118,6 @@ sub display_add_trans {
 				 $q->hidden( -name => 'word', -value => $word ),
 				 $q->hidden( -name => 'word_id', -value => $word_id ),
 				 $q->hidden( -name => 'lang', -value => $lang ),
-				 $q->submit( -value => 'Add Translation' ),
+				 $q->submit( -value => $p->{UI}->{add_trans_b} ),
 				 $q->end_form();
 } # sub display_add_trans

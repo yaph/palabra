@@ -1,0 +1,25 @@
+# define strings for UI components
+# *_b = button
+# *_l = link text
+# *_msg = message
+
+# Do not change the keys unless
+# you know what you are doing.
+
+# Strings on buttons
+add_word_b=Add word
+edit_desc_b=Edit description
+store_desc_b=Store description
+
+# link texts
+edit_desc_l=Edit description
+show_index_l=Show index
+trans_l=Translations
+contact_l=Contact
+
+# Messages to users
+edit_desc_msg=Please use only the following HTML tags in descriptions of meaning:
+last_edit_msg=Last edited:
+mail_sent_msg=Thank you. The following data has been sent:
+no_trans_msg=No translations were found.
+no_desc_msg=Please edit the description!
