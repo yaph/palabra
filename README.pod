@@ -1,4 +1,4 @@
-=head1 palabra 1.7
+=head1 palabra 1.8
 
 Copyright 2003 - 2004 Ramiro Gómez. All rights reserved!
 
@@ -46,6 +46,10 @@ words for all available languages.
 
 =over
 
+=item * Edit form HTML check and JavaScript for inserting tags within text
+
+=item * Modularization
+
 =item * I18N, L10N
 
 =item * Error handling
@@ -61,5 +65,21 @@ words for all available languages.
 =item * Statistics
 
 =item * Table Lock
+
+=back
+
+=head1 Known bugs
+
+=over
+
+=item * add_word.cgi no show_index link
+
+=item * index.cgi top_bar no show_index link
+
+=item * edit_word.cgi descriptions may corrupt layout
+
+=item * show_index.cgi show languages instead of translations
+
+=item * contact.cgi show languages instead of translations
 
 =back

@@ -1,53 +1,107 @@
 body {
-	background:white;
-	margin-left:1%;
-	margin-right:1%;
-	margin-top:0%;
-	margin-bottom:0%;
+   margin-left:0px;
+   margin-right:0px;
+   margin-top:0px;
+   margin-bottom:0px;
+   background: #f1f1f1;
+   font-family:verdana, helvetica, sans-serif;
 }
 
-a:		{font-family:verdana, arial, sans-serif;}
-a:link		{font-family:verdana, arial, sans-serif;}
-a:visited	{font-family:verdana, arial, sans-serif;}
-a:active	{font-family:verdana, arial, sans-serif;}
+div#top_bar {
+   padding: 4px;
+   font-family:verdana, helvetica, sans-serif;
+   color:black;
+   background:#f1f1f1;
+   font-size:12px;
+   line-height:14px;
+}
+
+table#main_table { width: 100%; }
+td#left_column { vertical-align: top;  width: 180px; }
+td#center_column {  vertical-align: top;}
+td#right_column { vertical-align: top;  width: 180px; }
+
+div#main_content{
+   border:2px solid #dddddd; 
+   padding: 4px;
+   font-family:verdana, helvetica, sans-serif;
+   color:black;
+   background:#ffffff;
+   font-size:12px;
+   line-height:14px;
+}
+
+div#copyright{
+   padding: 4px;
+   font-family:verdana, helvetica, sans-serif;
+   color:black;
+   background:#f1f1f1;
+   font-size:10px;
+   line-height:10px;
+   text-align:center;
+}
+
+div.box_header {
+   padding: 4px;
+   border:2px solid #dddddd; 
+   font-family:verdana, helvetica, sans-serif;
+   color:black;
+   background:#e1e1e1;
+   font-size:12px;
+   line-height:14px;
+}
+
+div.box {
+   margin-bottom: 4px;
+   padding: 4px;
+   border:2px solid #dddddd; 
+   font-family:verdana, helvetica, sans-serif;
+   color:black;
+   background:#ffffff;
+   font-size:12px;
+   line-height:15px;
+}
+
+a	{font-family:verdana, arial, sans-serif;}
 a:hover {
 	color:red;
 	text-decoration:none;
 	font-family:verdana, arial, sans-serif;
+	background:#DCDCDC;
 }
 
 h1 {
 	font-family:verdana, arial, sans-serif;
 	font-size:14px;
-	font-color:#333;
+	color:#000000;
 	cursor:text;
 }
 
 h2 {
 	font-family:verdana, arial, sans-serif;
 	font-size:13px;
-	font-color:#333;
+	color:#000000;
 	cursor:text;
 }
 
 h3 {
 	font-family:verdana, arial, sans-serif;
 	font-size:13px;
-	font-color:#333;
+	color:#000000;
 	cursor:text;
 }
 
 h4 {
 	font-family:verdana, arial, sans-serif;
 	font-size:13px;
-	font-color:#333;
+	color:#000000;
 	cursor:text;
 }
 
 p {
 	font-family:verdana, arial, sans-serif;
 	font-size:12px;
-	color:#333;
+	color:#000000;
 	line-height:14px;
 	cursor:text;
 }
@@ -55,10 +109,10 @@ p {
 pre {
 	font-family:monospace;
 	font-size:12px;
-	color:#333;
+	color:#000000;
 	line-height:14px;
-	background-color: #EEE;
-	border: 1px solid #333;
+	background: #e7e7e7;
+	border: 1px solid #000000;
 	padding: 2px;
 	margin-left: 30px;
 	margin-right: 75px;
@@ -66,7 +120,7 @@ pre {
 }
 	
 ol { 
-	color:#333; 
+	color:#000000; 
 	font-family: verdana, helvetica, sans-serif; 
 	font-size: 12px; 
 	line-height:14px;
@@ -74,7 +128,7 @@ ol {
 }
 	
 ul { 
-	color:#333; 
+	color:#000000; 
 	font-family: verdana, helvetica, sans-serif; 
 	font-size: 12px; 
 	line-height:14px;
@@ -83,7 +137,7 @@ ul {
 
 li { 
 	font-family: verdana, helvetica, sans-serif;
-	color:#333; 
+	color:#000000; 
 	font-size: 12px; 
 	margin-left: 0px; 
 	margin-right: 0px; 
@@ -95,7 +149,7 @@ li {
 
 dd { 
 	font-family: verdana, helvetica, sans-serif;
-	color:#333; 
+	color:#000000; 
 	font-size: 12px; 
 	margin-top: 4px; 
 	line-height:14px;
@@ -104,7 +158,7 @@ dd {
 
 dt { 
 	font-family: verdana, helvetica, sans-serif;
-	color:#333; 
+	color:#000000; 
 	font-size: 12px; 
 	margin-top: 4px; 
 	line-height:14px;
@@ -114,7 +168,7 @@ dt {
 th { 
 	font-family: verdana, helvetica, sans-serif;
 	font-size: 12px; 
-	font-color:#333;
+	color:#000000;
 	font-weight:bold;
 	cursor:text;
 }
@@ -122,103 +176,7 @@ th {
 td { 
 	font-family: verdana, helvetica, sans-serif;
 	font-size: 12px; 
-	font-color:#333;
+	color:#000000;
 	cursor:text;
 }
 
-select {
-	background-color:white; 
-	color:black;
-	border:2px solid #DDDDDD; 
-	font-weight:bold;
-	font-family:verdana, helvetica, sans-serif;
-	font-size:85%;
-	width:90px;
-}
-
-input {
-	background-color:white; 
-	color:black;
-	border:2px solid #DDDDDD; 
-	font-weight:bold;
-	font-family:verdana, helvetica, sans-serif;
-	font-size:85%;
-	vertical-align:center;
-}
-
-.justify	{text-align:justify;}
-.left		{text-align:left;}
-.right		{text-align:right;}
-.indent		{text-indent:8%;text-align:justify;}
-.medium		{font-size:85%;}
-.quote		{font-size:80%;margin-left:4%;}
-.small		{font-size:80%;}
-.yellow		{background-color:yellow;}
-.white_bg	{background-color:white;color:#333}
-
-.center	{	
-	text-align:center;
-	font-family: verdana, helvetica, sans-serif;
-	font-size: 12px; 
-	font-color:#333;
-	cursor:text;
-}
-
-.centersmall {	
-	text-align:center;
-	font-family: verdana, helvetica, sans-serif;
-	font-size: 10px; 
-	font-color:#333;
-	cursor:text;
-}
-
-.navbar	{
-	font-family: verdana, helvetica, sans-serif;
-	color:black;
-	background-color:#f1f1f1;
-	font-size:12px;
-	line-height:14px;
-}
-.navbar a:hover	{
-	font-family: verdana, helvetica, sans-serif;
-	color: #336699;
-	text-decoration:none;
-	background-color:#DCDCDC;
-}
-.navbar a:link {
-	font-family: verdana, helvetica, sans-serif;
-	color: #336699;
-	font-family:verdana, arial, sans-serif;
-	font-size:12px;
-}
-.navbar a:visited {
-	font-family: verdana, helvetica, sans-serif;
-        color:grey;
-	font-family:verdana, arial, sans-serif;
-	font-size:12px;
-}
-.navbar a:active {
-	font-family: verdana, helvetica, sans-serif;
-        color: #336699;
-	font-family:verdana, arial, sans-serif;
-	font-size:12px;
-}
-
-.navbar select {
-	background-color:white; 
-	color:black;
-	border:2px solid #DDDDDD; 
-	font-weight:bold;
-	font-family:verdana, helvetica, sans-serif;
-	font-size:85%;
-	width:90px;
-}
-.navbar input {
-	background-color:white; 
-	color:black;
-	border:2px solid #DDDDDD; 
-	font-weight:bold;
-	font-family:verdana, helvetica, sans-serif;
-	font-size:85%;
-	vertical-align:center;
-}

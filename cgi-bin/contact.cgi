@@ -82,7 +82,7 @@ sub display_mail_form {
     $HTML .= $q->Tr( $q->td, $q->td( $q->submit( -value => $UI->{send_mail_b} ), 
 				     $q->reset( -value => $UI->{reset_b} ) ) 
 		     );
-    $HTML .= $q->end_form, $q->end_table;
+    $HTML .= $q->end_form . $q->end_table;
     return $HTML;
 } # display_mail_form
 
