@@ -1,0 +1,21 @@
+palabra 1.16
+Copyright 2003 Ramiro Gómez. All rights reserved!
+
+This program is offered without warranty of any kind. See the file LICENSE for redistribution terms.
+
+Summary
+Palabra is a web-based dictionary that lets users edit and modify the descriptions of the entries. It is written in Perl and uses a MySQL database. During the look up process words are added to the database unless they already exist. Entries are case-sensitive and not censored. All users can edit and modify descriptions of the chosen word. Descriptions may contain certain HTML-Tags to structure the content. Disallowed tags are stripped.
+
+Todo
+* Phrases
+* I18N
+* settings
+* Documentation
+* synonymity (must be the same language as the one currently set)
+* translation (languages must be different)
+
+Requirements
+* A web server
+* MySQL
+* Perl 5.008 or higher
+* Perl Modules: CGI, CGI::Carp, DBI, DBD::mysql, HTML::Parser, Net::SMTP

@@ -1,0 +1,19 @@
+body  	{background-color:white; margin-left:2%; margin-right:2%}
+a:link		{color:#0000FF; font-family:Arial,sans-serif}
+a:visited 	{color:#800080; font-family:Arial,sans-serif}
+a:active 	{color:#FF0000; font-family:Arial,sans-serif}
+a:hover		{color:#ff0000; text-decoration:none; font-family:Arial,sans-serif}
+h1, h2, h3, h4, h5 {font-family:Arial,sans-serif}
+p	{color:#000000;font-family:Arial,sans-serif;}
+dd,li, td	{font-size:100%; color:#000000;font-family:Arial,sans-serif}
+dt, th {font-weight:bold; font-size:100%; color:#000000;font-family:Arial,sans-serif}
+th, td	{vertical-align:top} 
+hr {width:35%; color:black}
+.top_bar {background:yellow; font-size:90%; font-family:Arial,sans-serif}
+.left {text-align:left}
+.right {text-align:right}
+.bottomsmall {vertical-align:baseline; font-size:70%}
+.center {text-align:center}
+.centersmall {text-align:center; font-size:70%}
+.leftsmall {text-align:left; font-size:70%}
+.small {font-size:70%}
