@@ -15,15 +15,9 @@ my $q = CGI->new;
 my $word = $q->param('word');
 my $lang = $q->param('lang');
 
-# check value
-print $q->redirect('index.cgi') unless $lang =~ m/^\w\w_\w\w$/;
-
 # new Palabra object
 my $p = Palabra->new( word => $word,
 		      lang => $lang );
-$word = $p->trim_ws($word);
-print $q->redirect('index.cgi') if $word eq '';
-
 my $UI = $p->get_UI;
 my $dbh = $p->get_db_handle;
 my $title = '';

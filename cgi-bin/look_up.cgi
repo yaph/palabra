@@ -15,14 +15,9 @@ my $q = CGI->new;
 my $lang = $q->param('lang');
 my $word = $q->param('word');
 
-print $q->redirect('index.cgi') unless $lang =~ m/^\w\w_\w\w$/;
-
 my $p = Palabra->new( word => $word,
 		      title => $word,
 		      lang => $lang);
-
-$word = $p->trim_ws($word);
-print $q->redirect('index.cgi') if $word eq '';
 
 # Check if word exists.
 my $dbh = $p->get_db_handle;

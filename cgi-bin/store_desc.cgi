@@ -16,18 +16,11 @@ my $word = $q->param('word');
 my $lang = $q->param('lang');
 my $description = $q->param('description');
 
-# check values
-print $q->redirect('index.cgi') unless $word_id =~ m/^\d+$/;
-print $q->redirect('index.cgi') unless $lang =~ m/^\w\w_\w\w$/;
-
 my $p = Palabra->new( word => $word,
 		      title => $word, 
 		      lang => $lang );
 
-$word = $p->trim_ws($word);
-print $q->redirect('index.cgi') if $word eq '';
-
-# connect to MySQL database
+$description = $p->trim_ws($description);
 my $dbh = $p->get_db_handle;
 
 # check description using HTML::Parser

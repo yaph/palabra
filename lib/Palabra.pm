@@ -4,20 +4,16 @@
 package Palabra;
 use strict;
 use CGI;
-use DBI;
+use lib qw(/var/www/lib/perl /home/groups/p/pa/palabra/lib);
+use Database qw(db_connect);
 
 use vars qw($VERSION);
-$VERSION = '1.3';
+$VERSION = '1.7';
 
 my $q = CGI->new;
 
 ################ Configuration START ###################
-my $host_name = "localhost";#"mysql.sourceforge.net";
-my $db_name = "palabra";
-my $db_user = "palabra";
-my $db_pass = "palabra";
-my $dsn = "DBI:mysql:host=$host_name;database=$db_name";
-my $UI_file_dir = '/var/www/palabra/UI/'; #/home/groups/p/pa/palabra/lib
+my $UI_file_dir = '/var/www/palabra/UI/';#'/home/groups/p/pa/palabra/UI'
 ################ Configuration END #####################
 
 ############### Constructor START ######################
@@ -35,19 +31,39 @@ sub new {
     my $class = shift;
     my %args = (%palabra_defaults, @_);
     my $self = bless { %args }, $class;
+    $self->check_input;
     $self->set_UI;
-    $self->{dbh} = $self->db_connect;
+    $self->{dbh} = db_connect;
     return $self;
 } # sub new
 ############### Construtcor END ########################
 
 ################ Subroutines START #####################
 
+sub check_input {
+    my $self = shift;
+    while (my ($name, $input) = each %$self) {
+	if ( $input ) {
+	    $input = $self->trim_ws($input);
+	    $self->{$name} = $input;
+	    if ( $name eq 'word' && $input eq '' ) {
+		$self->error;
+	    } elsif ( $name eq 'lang' && $input !~ m/^\w\w_\w\w$/ ) {
+		$self->error;
+	    } elsif ( $name eq 'word_id' && $input !~ m/^\d+$/ ) {
+		$self->error;
+	    } elsif ( $name eq 'tr_lang' && $input !~ m/^\w\w_\w\w$/ ) {
+		$self->error;
+	    }
+	}
+    }
+}
+
 # set UI strings according to chosen language
 sub set_UI {
     my $self = shift;
     my $UI_file = $UI_file_dir . $self->{lang};
-    open UI, $UI_file or die "Can't open $UI_file: $!";
+    open UI, $UI_file or $self->error;
     while (<UI>) {
 	chomp;
 	next if /^\s*#/;
@@ -57,22 +73,15 @@ sub set_UI {
 	$UI_string = $self->trim_ws($UI_string);
 	$self->{UI}->{$UI_entry} = $UI_string;
     }
-    close UI or die "Can't close $UI_file: $!";
+    close UI or $self->error;
 } # sub set_UI
 
-# Connect to MySQL server
-sub db_connect {
-    my $self = shift;
-    return( DBI->connect( $dsn, $db_user, $db_pass, { PrintError => 0, RaiseError => 1 } ) );
-}
-
-# accessor methods
 # return database handle
 sub get_db_handle {
     return (shift)->{dbh};
 }
 
-# return UI strinsg as a hashref
+# return UI strings as a hashref
 sub get_UI {
     return (shift)->{UI};
 }
@@ -184,7 +193,7 @@ sub html_footer {
     my $UI = $self->get_UI;
     my $contact_url = sprintf( "contact.cgi?lang=%s", $q->escape($self->{lang}) );
     
-    my $HTML = $q->div( { -class => 'centersmall' },
+    my $HTML = $q->hr, $q->div( { -class => 'centersmall' },
 			'[' . $q->a( { -href => $contact_url }, $UI->{contact_l} ) . ']' .
 			'[' . $q->a( { -href => 'https://sourceforge.net/cvs/?group_id=83614' }, 'CVS' ). ']' .
 			'[' . $q->a( { -href => 'http://www.ramiro.org/palabra/README.html' }, $UI->{doc_l} ) . ']' .
@@ -203,6 +212,13 @@ sub html_footer {
     $dbh->disconnect;
     return $HTML;
 } # html_footer
+
+# returns error message
+sub error {
+    print $q->header, $q->start_html('Error'), $q->p('An Error occurred!'),
+    $q->a( { -href => 'javascript:history.back()' }, 'Go back' ), $q->end_html;
+    exit 1;
+}
 
 # returns look up form
 sub display_look_up_form {

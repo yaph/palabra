@@ -18,11 +18,6 @@ my $lang = $q->param('lang');
 my $trans = $q->param('trans');
 my $tr_lang = $q->param('tr_lang');
 
-# check values
-print $q->redirect('index.cgi') unless $word_id =~ m/^\d+$/;
-print $q->redirect('index.cgi') unless $lang =~ m/^\w\w_\w\w$/;
-print $q->redirect('index.cgi') unless ( !defined($tr_lang) || $tr_lang =~ m/^\w\w_\w\w$/ );
-
 my $script = $q->url( -relative => 1 );
 
 # new Palabra object
@@ -44,7 +39,7 @@ my $ref_lang = $p->get_languages($dbh);
 if ( defined( $q->param('do') ) && $q->param('do') eq 'add_trans' ) { # add a translation
     # check whether translation was supplied
     $trans = $p->trim_ws($trans);
-    print $q->redirect('index.cgi') if ($trans eq '');
+    $p->error if ($trans eq '');
 
     # test whether specified translation already exists
     my $stmt = "SELECT * FROM $tr_table WHERE word_id = ? AND trans = ? AND lang = ?";

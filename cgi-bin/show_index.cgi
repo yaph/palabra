@@ -21,14 +21,10 @@ my @nav_link; # array which holds navigational links
 my $nav_link; # scalar to display navigational links
 my $max_links = 20; # max number of page links shown
 
-# regex for matching the first letter ignoring case
-my $regex = '^[' .$letter . uc $letter . ']';
-
-# check values
-print $q->redirect('index.cgi') unless $letter =~ m/^[\w]?$/;
-print $q->redirect('index.cgi') unless $lang =~ m/^[\w-]+$/;
-
 my $p = Palabra->new( lang => $lang );
+$p->error unless $letter =~ m/^[\w]?$/;
+my $regex = '^[' .$letter . uc $letter . ']'; # match first letter ignore case
+
 my $UI = $p->get_UI;
 my $title = $p->set_HTML_title( $UI->{show_index_l} );
 my $css = $p->get_css;

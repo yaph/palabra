@@ -9,16 +9,30 @@ my $file = shift;
 my $p = Palabra->new();
 my $dbh = $p->db_connect();
 
+#create_categories();
 create_allowed_tags();
 create_languages();
 
 $dbh->disconnect();
 
+#sub create_categories {
+#   my $categories = q{ (
+#			 cat_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+#			 parent_id INTEGER UNSIGNED,
+#			 cat_name VARCHAR(30),
+#			 level SMALLINT,
+#			 lang_code VARCHAR(5) NOT NULL,
+#			 PRIMARY KEY (cat_id)
+#			 ) };
+#    $dbh->do( "DROP TABLE IF EXISTS categories" );
+#    $dbh->do( "CREATE TABLE categories $categories" );
+#}
+
 sub create_allowed_tags {
     my @allowed_tags = qw(a dd dl dt em h1 h2 h3 h4 h5 h6 h7 li ol p pre strong table td tr ul);
     my $create_tags =  q{ (
-			   id int(11) NOT NULL auto_increment,
-			   tag varchar(10) NOT NULL,
+			   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+			   tag VARCHAR(10) NOT NULL,
 			   PRIMARY KEY (id),
 			   UNIQUE KEY tag (tag)
 			   ) };
@@ -32,9 +46,9 @@ sub create_languages {
     my $ref_lang = get_languages();
     
     my $create_languages = q{ (
-			       id int(11) NOT NULL auto_increment,
-			       lang_code varchar(5) NOT NULL,
-			       lang_name varchar(255) NOT NULL,
+			       id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+			       lang_code VARCHAR(5) NOT NULL,
+			       lang_name VARCHAR(255) NOT NULL,
 			       PRIMARY KEY (id),
 			       UNIQUE KEY lang_code (lang_code),
 			       UNIQUE KEY lang_name (lang_name)
@@ -44,10 +58,11 @@ sub create_languages {
     $dbh->do( "CREATE TABLE languages $create_languages" );
 
     my $create_lang = q{ (
-			  word_id int(11) NOT NULL auto_increment,
-			  word varchar(255) binary NOT NULL,
-			  description text,
-			  t timestamp,
+			  word_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+			  word VARCHAR(255) BINARY NOT NULL,
+			  description TEXT,
+			  looked_up INTEGER UNSIGNED,
+			  t TIMESTAMP,
 			  PRIMARY KEY (word_id),
 			  UNIQUE KEY word (word)
 			  ) };
@@ -58,10 +73,10 @@ sub create_languages {
     } keys %{$ref_lang};
 
     my $create_trans = q{ (
-			   id int(11) NOT NULL auto_increment,
-			   word_id int(11) NOT NULL,
-			   lang varchar(5) NOT NULL,
-			   trans varchar(255) binary NOT NULL,
+			   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+			   word_id INTEGER NOT NULL,
+			   lang VARCHAR(5) NOT NULL,
+			   trans VARCHAR(255) BINARY NOT NULL,
 			   PRIMARY KEY (id)
 			   ) };
     

@@ -1,24 +1,32 @@
-=head1 palabra 1.20
+=head1 palabra 1.7
 
-Copyright 2003 Ramiro Gómez. All rights reserved!
+Copyright 2003 - 2004 Ramiro Gómez. All rights reserved!
 
 This program is offered without warranty of any kind. See the file LICENSE for redistribution terms.
 
 =head1 Summary
 
-Palabra is a web-based dictionary that lets users edit and modify the descriptions of the entries. It is written in Perl and uses a MySQL database. During the look up process words are added to the database unless they already exist. Entries are case-sensitive and not censored. All users can edit and modify descriptions of the chosen word. Descriptions may contain certain HTML-Tags to structure the content. Disallowed tags are stripped. Users can add translations for existing words for all available languages.
+Palabra is a web-based dictionary that lets users edit the descriptions of the entries. 
+It is written in Perl and uses a MySQL database. Entries are case-sensitive and not censored.
+All users can edit descriptions of the chosen word. Descriptions may contain certain HTML-Tags
+to structure the content. Disallowed tags are stripped. Users can add translations for existing
+words for all available languages.
 
 =head1 Todo
 
 =over
 
-=item * I18N
+=item * I18N, L10N
+
+=item * error handling
 
 =item * support for PostgreSQL
 
 =item * Documentation
 
 =item * generic browse function
+
+=item * statistics
 
 =item * Table Lock
 

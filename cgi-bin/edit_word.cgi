@@ -15,10 +15,6 @@ my $word_id = $q->param('word_id');
 my $word = $q->param('word');
 my $lang = $q->param('lang');
 
-# check values
-print $q->redirect('index.cgi') unless $word_id =~ m/^\d+$/;
-print $q->redirect('index.cgi') unless $lang =~ m/^\w\w_\w\w$/;
-
 my $script = $q->url( -relative => 1 );
 
 # new Palabra object
@@ -29,9 +25,6 @@ my $p = Palabra->new( word_id => $word_id,
 my $UI = $p->get_UI;
 $p->set_HTML_title($UI->{edit_desc_l});
 
-$word = $p->trim_ws($word);
-print $q->redirect('index.cgi') if $word eq '';
-
 # connect to MySQL database and get information for word.
 my $dbh = $p->get_db_handle;
 my $stmt = "SELECT * FROM $lang WHERE word_id = ? AND word = ?";
@@ -41,7 +34,7 @@ my $ref = $sth->fetchrow_hashref;
 $sth->finish;
 
 # word_id doesn't exist
-print $q->redirect('index.cgi') unless $ref;
+$p->error unless $ref;
 
 # date and time
 my ($y, $m, $d, $h, $min, $s) = unpack("A4A2A2A2A2A2", $ref->{t});

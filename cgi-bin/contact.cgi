@@ -15,9 +15,6 @@ $CGI::DISABLE_UPLOADS = 1;
 my $q = CGI->new;
 my $lang = $q->param('lang');
 
-# check value
-print $q->redirect('index.cgi') unless $lang =~ m/^\w\w_\w\w$/;
-
 # new Palabra object
 my $p = Palabra->new( lang => $lang );
 my $UI = $p->get_UI;
