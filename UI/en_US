@@ -18,7 +18,7 @@ look_up_b=Look up
 # link texts
 edit_desc_l=Edit description
 show_index_l=Show index
-trans_l=Translations
+trans_l=Translate
 contact_l=Contact
 project_info_l=Project info
 doc_l=Doc
@@ -34,8 +34,13 @@ no_trans_msg=No translations were found.
 no_desc_msg=No description yet
 no_entries_msg=No entries starting with this letter in the dictionary.
 entry_total_msg=Total number of entries:
-add_trans_msg=Add a translation:
+add_trans_msg=Add a translation for:
 add_word_msg=Add word to
+trans_msg=Translations
+no_name_msg=No name entered.
+no_mail_msg=E-mail-address is not accepted.
+no_subject_msg=Subject is empty or contains disallowed characters.
+no_message_msg=Message is empty or contains disallowed characters.;
 
 # form elements
 name_f=Name:

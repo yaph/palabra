@@ -34,8 +34,13 @@ no_trans_msg=Keine Übersetzungen gefunden.
 no_desc_msg=Keine Beschreibung vorhanden
 no_entries_msg=Bisher keine Einträge mit diesem Anfangsbuchstaben im Wörterbuch.
 entry_total_msg=Gesamtzahl der Einträge:
-add_trans_msg=Eine Übersetzung hinzufügen:
+add_trans_msg=Übersetzung hinzufügen für:
 add_word_msg=Wort hinzufügen für
+trans_msg=Übersetzungen
+no_name_msg=Kein Name eingegeben.
+no_mail_msg=E-Mail-Adresse nicht gültig.
+no_subject_msg=Betreff ist leer oder entählt unerlaubte Zeichen.
+no_message_msg=Nachricht ist leer oder entählt unerlaubte Zeichen.
 
 # form elements
 name_f=Name:
