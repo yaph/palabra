@@ -11,16 +11,21 @@ $CGI::POST_MAX=1024*100;  # max 100 KBytes posts
 $CGI::DISABLE_UPLOADS = 1;  # no uploads
 my $q = CGI->new();
 
-my $id = $q->param('id'); # id of word to edit
-my $word = $q->param('word'); # set language
-my $lang = $q->param('lang'); # set language
+my $word_id = $q->param('word_id');
+my $word = $q->param('word');
+my $lang = $q->param('lang');
 my $description = $q->param('description');
 
 # check values
-die "'$id' is not accepted" unless $id =~ m/^\d+$/;
+die "'$word_id' is not accepted" unless $word_id =~ m/^\d+$/;
 die "'$lang' is not accepted" unless $lang =~ m/^\w\w_\w\w$/;
 
-my $p = Palabra->new(word => $word, lang => $lang);
+my $p = Palabra->new( word => $word,
+		      title => $word, 
+		      lang => $lang );
+
+$word = $p->trim_ws($word);
+die "Entry '$word' is not accepted" if $word eq '';
 
 # connect to MySQL database
 my $dbh = $p->db_connect();
@@ -29,17 +34,13 @@ my $dbh = $p->db_connect();
 $description = parse_html($description, $dbh);
 
 # update information for word
-$dbh->do("UPDATE $lang SET description = ? WHERE id = ? AND word = ?", undef, $description, $id, $word );
+$dbh->do("UPDATE $lang SET t = NOW(), description = ? WHERE word_id = ? AND word = ?", undef, $description, $word_id, $word );
 $dbh->disconnect();
 
-# stuff info into Palabra Object
-$p->{description} = $description;
-$p->{id} = $id;
+my $url = sprintf( "look_up.cgi?word_id=%s&lang=%s&word=%s", $word_id, $lang, $q->escape( $word ) ); 
 
-# print HTML page for word
-print $p->html_header(),
-    $p->{description},
-    $p->html_footer();
+# redirect to word
+print $q->redirect( $url );
 
 # parse descriptions
 sub parse_html {

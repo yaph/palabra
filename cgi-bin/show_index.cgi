@@ -14,7 +14,8 @@ my $q = CGI->new();
 # HTML header information
 my $author = 'Ramiro Gómez, ramiro@rahoo.de';
 my $css = '/style/palabra.css';
-my $home = 'palabra';
+my $home = 'Palabra';
+my $title = 'Alphabetical Index';
 
 my $lang = $q->param('lang');
 my $letter = $q->param('letter');
@@ -34,16 +35,27 @@ die "Entry '$letter' is not accepted" unless $letter =~ m/^[\w]?$/;
 die "Entry '$lang' is not accepted" unless $lang =~ m/^[\w-]+$/;
 
 my $p = Palabra->new( lang => $lang );
-$p->{home_url} = sprintf( "index.cgi?lang=%s", $q->escape($lang) );
+
+# connect to DB
+my $dbh = $p->db_connect();
+
+# get map of language codes and language names
+my $ref_lang = $p->get_languages($dbh);
+
+my $lang_name = $ref_lang->{$lang};
+
+my $home_url = sprintf( "index.cgi?lang=%s", $q->escape($lang) );
 
 print $q->header(), $q->start_html( 
-				    -title => $home,
+				    -title => $title,
 				    -meta => { copyright => "copyright 2003 $author" },
 				    -style=>{ src => $css }
 				    ),
-    $q->table( { -width => '100%', -class => 'top_bar' },
+    $q->table( { -width => '100%', -class => 'navbar' },
 	       $q->Tr(
-		      $q->td( { -class => 'left' }, $q->a( { -href => $p->{home_url} }, $p->{home} ), ' : ',  'Alphabetical index' ),
+		      $q->td( { -class => 'left' },
+			      $q->a( { -href => $home_url }, $home ), ' : ', $title,
+			      $q->br(), $lang_name ),
 		      $q->td( { -class => 'right' }, $p->display_look_up_form($lang) )
 		      )
 	       ),
@@ -63,7 +75,6 @@ sub generate_alphabet  {
 
 sub get_list {
     my @list;
-    my $dbh = $p->db_connect();
     
     # initially invoked get number of records matching letter
     if (!$start_pos) {
@@ -116,7 +127,7 @@ sub get_list {
     $nav_link = join " ", map { "[$_]" } @nav_link;
     
     my $limit = "LIMIT $start_pos, $page_size";
-    my $stmt = "SELECT * FROM $lang WHERE word REGEXP ? AND language = ? ORDER BY word $limit";
+    my $stmt = "SELECT * FROM $lang WHERE word REGEXP ? AND lang = ? ORDER BY word $limit";
     my $sth = $dbh->prepare($stmt);
     $sth->execute($regex, $lang);
     while (my $ref = $sth->fetchrow_hashref()) {
@@ -126,7 +137,7 @@ sub get_list {
 	    $info = ' - ' . $q->span( { -class => 'small' }, 'No description yet' );
 	}
 	
-	my  $url = sprintf( "look_up.cgi?id=%d;word=%s;lang=%s", $ref->{id}, $q->escape($ref->{word}), $q->escape($lang) );
+	my  $url = sprintf( "look_up.cgi?word_id=%d;word=%s;lang=%s", $ref->{word_id}, $q->escape($ref->{word}), $q->escape($lang) );
 	push @list, $q->a( { -href => $url }, $ref->{word} ) . $info;
     }
     $sth->finish();

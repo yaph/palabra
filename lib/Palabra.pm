@@ -1,29 +1,29 @@
 # Copyright 2003 Ramiro Gómez. All rights reserved!
-# This program is offered without warranty of any kind. See the file LICENSE for redistribution terms.
+# This program is offered without warranty of any kind.
+# See the file LICENSE for redistribution terms.
 package Palabra;
 use strict;
 use CGI;
 use DBI;
 
 use vars qw($VERSION);
-$VERSION = '1.17';
+$VERSION = '1.20';
 
 my $q = CGI->new();
 
 ################ Configuration START ###################
-my $host_name = "localhost";
+my $host_name = "localhost";#"mysql.sourceforge.net";
 my $db_name = "palabra";
 my $db_user = "palabra";
-my $db_pass = "pass";
+my $db_pass = "palabra";
 my $dsn = "DBI:mysql:host=$host_name;database=$db_name";
 ################ Configuration END #####################
 
 ############### Constructor START ######################
 my %palabra_defaults = (
-			home => 'palabra',
-			home_url => 'index.cgi',
 			author => 'Ramiro Gómez',
 			css => '/style/palabra.css',
+			title => 'Palabra',
 			lang => 'en_US',
 			word => ''
 			);
@@ -46,26 +46,43 @@ sub db_connect {
 # Print standard HTML-header
 sub html_header {
     my $self = shift;
-    $self->{edit_url} = sprintf( "edit_word.cgi?id=%d;word=%s;lang=%s", $self->{id}, $q->escape($self->{word}), $q->escape($self->{lang}) );
-    $self->{index_url} = sprintf( "show_index.cgi?lang=%s", $q->escape($self->{lang}) );
-    $self->{home_url} = sprintf( "index.cgi?lang=%s", $q->escape($self->{lang}) );
-    my $title = $self->{home} . ' : '. $self->{word};
+    my $script = $self->{script};
+
+    # links in navbar
+    my $edit_url = sprintf( "edit_word.cgi?word_id=%d;word=%s;lang=%s",
+				$self->{word_id}, $q->escape($self->{word}), $q->escape($self->{lang}) );
+    my $edit_link =  '[' . $q->a( { -href => $edit_url }, 'Edit description' ) . ']';
+
+    my $tr_url = sprintf( "translate.cgi?word_id=%d;word=%s;lang=%s",
+			  $self->{word_id}, $q->escape($self->{word}), $q->escape($self->{lang}) );
+    my $tr_link = '[' . $q->a( { -href => $tr_url }, 'Translations' ) . ']';
+
+    # determine which link not to show in navbar
+    if ($script eq 'edit_word.cgi') {
+	$edit_link = 'Edit description';
+
+    } elsif ($script eq 'translate.cgi') {
+	$tr_link = 'Translations';
+    }
+
+    # always show this links
+    my $index_url = sprintf( "show_index.cgi?lang=%s", $q->escape($self->{lang}) );
+    my $index_link = '[' . $q->a( { -href => $index_url }, 'Show index' ) . ']';
+    
+    # link to home page
+    my $home_url = sprintf( "index.cgi?lang=%s", $q->escape($self->{lang}) );
+    my $home_link = $q->a( { -href => $home_url }, 'Palabra' );
+
     return $q->header(), $q->start_html(
-					-title => $title,
+					-title => $self->{title},
 					-meta => { copyright => "copyright 2003 $self->{author}" },
 					-style => { src => $self->{css} }
 				       ),
-    $q->table( { -width => '100%', -class => 'top_bar' },
+    $q->table( { -width => '100%', -class => 'navbar' },
 	       $q->Tr(
-		      $q->td( { 
-			  -class => 'left' }, $q->a( { -href => $self->{home_url} }, $self->{home} ), ' : ',  $self->{word},
-			      $q->br(),
-			      $q->span( { class => 'bottomsmall' },
-					'[' . $q->a( { -href => $self->{edit_url} }, 'Edit description' ) . ']',
-					'[' . $q->a( { -href => $self->{index_url} }, 'Show index' ) . ']',
-				#	$q->a( { -href => $self->{home_url} }, 'translations' ),
-				#	$q->a( { -href => $self->{home_url} }, 'synonyms' )
-					)
+		      $q->td( { -class => 'left' }, 
+			      $home_link, ' : ',  $self->{word},
+			      $q->br(), $edit_link, $index_link, $tr_link
 			      ),
 		      $q->td( { -class => 'right' }, $self->display_look_up_form($self->{lang}) )
 		      )
@@ -75,25 +92,25 @@ sub html_header {
 # Print standard HTML-footer
 sub html_footer {
     my $self = shift;
-    $self->{about_url} = sprintf( "about.cgi?lang=%s", $q->escape($self->{lang}) );
-    $self->{contact_url} = sprintf( "contact.cgi?lang=%s", $q->escape($self->{lang}) );
+    my $contact_url = sprintf( "contact.cgi?lang=%s", $q->escape($self->{lang}) );
 
-    return $q->hr(), $q->div( { -class => 'centersmall' },
-			      '[', $q->a( { -href => $self->{about_url} }, 'about' ), ']',
-			      '[', $q->a( { -href => $self->{contact_url} }, 'contact' ), ']',
-			      '[', $q->a( { -href => 'https://sourceforge.net/cvs/?group_id=83614' }, 'cvs' ), ']',
-			      '[', $q->a( { -href => 'https://sourceforge.net/projects/palabra/' }, 'project info' ), ']', $q->br(),
-			      '&copy; Copyright 2003 ' . $self->{author} . '. All rights reserved!'
-			      ),
-				  # sf.net logo
-				  $q->a( { -href => 'http://sourceforge.net' }, $q->img( { -src => 'http://sourceforge.net/sflogo.php?group_id=83614&amp;type=1',
-											   -width => 88,
-											   -height => 31,
-											   -alt => 'SourceForge.net Logo'
-											   }
-											 )
-					 ),
-				  $q->end_html();
+    return $q->div( { -class => 'centersmall' },
+		    '[', $q->a( { -href => $contact_url }, 'contact' ), ']',
+		    '[', $q->a( { -href => 'https://sourceforge.net/cvs/?group_id=83614' }, 'cvs' ), ']',
+		    '[', $q->a( { -href => 'http://www.ramiro.org/Palabra/README.html' }, 'docs' ), ']',
+		    '[', $q->a( { -href => 'https://sourceforge.net/projects/palabra/' }, 'project info' ), ']',
+		    $q->br(), '&copy; Copyright 2003 ' . $self->{author} . '. All rights reserved!'
+		    ),
+			# sf.net logo
+			$q->a( { -href => 'http://sourceforge.net' },
+			       $q->img( { -src => 'http://sourceforge.net/sflogo.php?group_id=83614&amp;type=1',
+					  -width => 88,
+					  -height => 31,
+					  -alt => 'SourceForge.net Logo'
+					  }
+					)
+			       ),
+			       $q->end_html();
 } # html_footer
 
 sub display_look_up_form {
@@ -130,7 +147,8 @@ sub display_edit_form {
     $dbh->disconnect;
 
     my $info =<<EOF;
-Please use <a href="http://www.scots-online.org/airticles/phonetics.htm">HTML-entities</a> for IPA characters in phonetic transcriptions. You may use the following HTML tags in descriptions of meaning:
+Please use <a href="http://www.phon.ucl.ac.uk/home/wells/ipa-unicode.htm">HTML-entities</a> 
+for IPA characters in phonetic transcriptions. You may use the following HTML tags in descriptions of meaning:
 EOF
     
     $info .= join ", ", map { '&lt;' . $_ . '&gt;' } @{$ref_allowed_tags};
@@ -138,7 +156,7 @@ EOF
   
     return $q->h4('Edit description:' ),
     $q->start_form( -action => 'store_desc.cgi' ),
-    $q->hidden( -name => 'id', -value => $self->{id} ),
+    $q->hidden( -name => 'word_id', -value => $self->{word_id} ),
     $q->hidden( -name => 'word', -value => $self->{word} ),
     $q->hidden( -name => 'lang', -value => $self->{lang} ),
     $q->p( { -class => 'small' }, $info ),
