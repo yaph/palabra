@@ -1,45 +1,41 @@
-# Copyright 2003 Ramiro Gómez.
+# Copyright 2003 - 2005 Ramiro Gómez.
 # This program is offered without warranty of any kind.
 # See the file LICENSE for redistribution terms.
 package Palabra;
 use strict;
 use CGI;
-use lib qw(/var/www/lib/perl);
+use lib qw(/srv/www/lib/perl);
 use Database qw(db_connect);
 
 use vars qw($VERSION);
-$VERSION = '1.8';
+$VERSION = '0.8';
 
 my $q = CGI->new;
 
 ################ Configuration START ###################
-my $UI_file_dir = '/var/www/palabra/UI/';
+my $UI_file_dir = '/srv/www/palabra/UI/';
+my $JavaScript = '/js/js-lib.js';
+my $css = '/style/palabra.css';
 ################ Configuration END #####################
 
-############### Constructor START ######################
-my %palabra_defaults = (
-			css => '/style/palabra.css',
-			title => 'Palabra',
-			lang => 'en_US',
-			word => '',
-			script => '',
-			JavaScript => '',
-			nav_links => 0,
-			table_prefix => 'palabra_'
-			);
+my %defaults = (
+		title => 'Palabra',
+		lang => 'en_US',
+		word => '',
+		script => '',
+		nav_links => 0,
+		table_prefix => 'palabra_'
+		);
 
 sub new {
     my $class = shift;
-    my %args = (%palabra_defaults, @_);
+    my %args = (%defaults, @_);
     my $self = bless { %args }, $class;
     $self->check_input;
     $self->set_UI;
     $self->{dbh} = db_connect;
     return $self;
-} # sub new
-############### Construtcor END ########################
-
-################ Subroutines START #####################
+}
 
 sub check_input {
     my $self = shift;
@@ -91,10 +87,6 @@ sub get_lang {
     return (shift)->{lang};
 }
 
-sub get_css {
-    return (shift)->{css};
-}
-
 sub get_HTML_title {
     return (shift)->{title};
 }
@@ -128,13 +120,6 @@ sub set_word_id {
     return $word_id;
 }
 
-sub set_JavaScript {
-    my $self = shift;
-    my $script = shift;
-    $self->{JavaScript} = $script;
-    return $script;
-}
-
 # returns HTML page
 sub html_page {
     my $self = shift;
@@ -154,10 +139,18 @@ sub html_page {
 	# links
 	my $edit_url = sprintf( "edit_word.cgi?word_id=%d;word=%s;lang=%s",
 				$word_id, $q->escape($word), $q->escape($lang) );
-	$edit_link =  $q->a( { -href => $edit_url }, $UI->{edit_desc_l} );
+	$edit_link =  $q->a( { -href => $edit_url,
+			       -title => $UI->{edit_desc_l}, }, 
+			     $q->img( { src => "/pics/edit.png",
+					alt => $UI->{edit_desc_l},
+					style => "margin-left:5px" } ) );
 	my $tr_url = sprintf( "translate.cgi?word_id=%d;word=%s;lang=%s",
 			      $word_id, $q->escape($word), $q->escape($lang) );
-	$tr_link = $q->a( { -href => $tr_url }, $UI->{trans_l} );
+	$tr_link = $q->a( { -href => $tr_url,
+			    -title => $UI->{trans_l} },
+			  $q->img( { src => "/pics/translate.png",
+				     alt => $UI->{trans_l},
+				     style => "margin-left:5px" } ) );
 	# determine which link not to show
 	if ($script eq 'edit_word.cgi') {
 	    $edit_link = $UI->{edit_desc_l};
@@ -168,73 +161,68 @@ sub html_page {
     }
     
     # HTML page
+    my $box_body;
     my $HTML = $q->header;
     $HTML .= $q->start_html(
 			    -title => $self->{title},
-			    -style => { src => $self->{css} },
-			    -script => $self->{JavaScript}
+			    -style => { src => $css },
+			    -script => { src => $JavaScript }
 			    );
-    $HTML .= $q->div( { -id => 'top_bar' }, $home_link, ' : ',  $word );
+    $HTML .= $q->div( { -id => 'top_bar' }, $home_link );
     $HTML .= $q->start_table( { -id => 'main_table',
 				-summary => 'main layout table' } );
     $HTML .= $q->start_Tr;
-    $HTML .= $q->td( { -id => 'left_column' }, 
-		     $q->div( { class => 'box_header' }, $q->strong( $UI->{look_up_b} ) ),
-		     $q->div( { class => 'box' }, 
-			      $self->display_look_up_form($lang)
-			      ),
-		     $q->div( { class => 'box_header' }, $q->strong('###Contribute') ),
-		     $q->div( { class => 'box' }, 
-			      $edit_link, $q->br,
-			      $tr_link
-			      ),
-		     $q->div( { class => 'box_header' }, $q->strong('###Download') ),
-		     $q->div( { class => 'box' },
-			      $q->a( { -href => 'https://sourceforge.net/cvs/?group_id=83614' }, 'CVS' )
-			      ),
-		     $q->div( { class => 'box_header' }, $q->strong('###Contact') ),
-		     $q->div( { class => 'box' },
-			      $q->a( { -href => $contact_url }, $UI->{contact_l} )
-			      ),
-		     $q->div( { class => 'box_header' }, $q->strong('###Project') ),
-		     $q->div( { class => 'box' },
-			      $q->a( { -href => '/palabra/README.html' }, $UI->{doc_l} ), $q->br,
-			      $q->a( { -href => 'https://sourceforge.net/projects/palabra/' }, $UI->{project_info_l} )
-			      ),
-		     $q->a( { -href => 'http://validator.w3.org/check?uri=referer' },
-			    $q->img( { -style => 'border:0;width:88px;height:31px',
-				       -src => 'http://www.w3.org/Icons/valid-xhtml10',
-				       -alt => 'Valid XHTML 1.0!',
-				       -height => 31,
-				       -width => 88 } )
-			    ),
-		     $q->a( { -href => 'http://jigsaw.w3.org/css-validator/check/referer' },
-			    $q->img( { -style => 'border:0;width:88px;height:31px',
-				       -src => 'http://jigsaw.w3.org/css-validator/images/vcss',
-				       -alt => 'Valid CSS',
-				       -height => 31,
-				       -width => 88 } )
-			    )
-		     );
+    $HTML .= $q->start_td( { -id => 'left_column' } );
 
-    $HTML .= $q->td( { -id => 'center_column' },
-		     $q->div( { -id => 'main_content' }, $html_page )
-		     );
+    $HTML .= $self->display_box( header => $UI->{look_up_b},
+				 body => $self->display_look_up_form );
+
+    $HTML .= $self->display_box( header => $UI->{project_h},
+				 body => $q->a( { -href => 'https://sourceforge.net/cvs/?group_id=83614' },
+						'CVS' ) . $q->br .
+				 $q->a( { -href => $contact_url },
+						$UI->{contact_l} ) . $q->br .
+				 $q->a( { -href => '/palabra/README.html' }, 
+					$UI->{doc_l} ) . $q->br .
+				 $q->a( { -href => 'https://sourceforge.net/projects/palabra/' },
+					$UI->{project_info_l} )
+				 );
+    $HTML .= $q->end_td;
+
+    $HTML .= $q->start_td( { -id => 'center_column' } );
+    $HTML .= $q->span( { class => "tab" }, $self->{title} );
+
+    if ($self->{nav_links}) {
+	$HTML .= $edit_link . $tr_link;
+	$HTML .= $q->img( { src => "/pics/printer.png",
+			    alt => "printer icon",
+			    style => "margin-left:5px" } );
+    }
+
+    $HTML .= $q->div( { -id => 'main_content' }, $html_page );
+    $HTML .= $q->end_td;
+
+    $HTML .= $q->start_td( { -id => 'right_column' } );
+
+    if ($self->{nav_links}) {
+	my @trans = $self->get_translations( dbh => $dbh,
+					     word_id => $word_id,
+					     lang => $lang );
+	if (@trans) {
+	    $box_body = join $q->br, @trans;
+	    $HTML .= $self->display_box( header => $UI->{trans_msg},
+					 body => $box_body );
+	}
+    }
     
-    $HTML .= $q->td( { -id => 'right_column' },
-		     $q->div( { class => 'box_header' }, $q->strong( $UI->{trans_msg} ) ),
-		     $q->div( { class => 'box' },
-			      join $q->br, $self->get_translations( dbh => $dbh,
-								    word_id => $word_id,
-								    lang => $lang )
-			      ),
-		     $q->div( { class => 'box_header' }, $q->strong( '###Recent' ) ),
-		     $q->div( { class => 'box' },
-			      join $q->br, $self->get_last_edited( dbh => $dbh,
-								   lang => $lang )
-			      )
-		     );
-    
+    my @last_edited = $self->get_last_edited( dbh => $dbh,
+					      lang => $lang );
+    if (@last_edited) {
+	$box_body = join $q->br, @last_edited;
+	$HTML .= $self->display_box( header => $UI->{recent_h},
+				     body => $box_body );
+    }
+    $HTML .= $q->end_td;
     $HTML .= $q->end_Tr;
     $HTML .= $q->end_table;
     
@@ -247,30 +235,15 @@ sub html_page {
     return $HTML;
 } # html_page
 
-# Print standard HTML-footer
-sub html_footer {
-    my $self = shift;
-    my $dbh = $self->get_db_handle;
-    my $UI = $self->get_UI;
-    my $contact_url = sprintf( "contact.cgi?lang=%s", $q->escape($self->{lang}) );
-    
-    my $HTML = $q->hr . $q->div( { -class => 'centersmall' },
-				 '[' . $q->a( { -href => $contact_url }, $UI->{contact_l} ) . ']' .
-				 '[' . $q->a( { -href => 'https://sourceforge.net/cvs/?group_id=83614' }, 'CVS' ). ']' .
-				 '[' . $q->a( { -href => 'http://www.ramiro.org/palabra/README.html' }, $UI->{doc_l} ) . ']' .
-				 '[' . $q->a( { -href => 'https://sourceforge.net/projects/palabra/' }, $UI->{project_info_l} ) . ']' .
-				 $q->br . '&copy; Copyright 2003-2004' . 
-				 $q->a( { -href => "http://www.ramiro.org/" }, 'Ramiro Gómez') . '.'
-				 );
-    $HTML .= $q->end_html;
-    $dbh->disconnect;
-    return $HTML;
-} # html_footer
-
 # returns error message
 sub error {
-    print $q->header, $q->start_html('Error'), $q->p('An Error occurred!'),
-    $q->a( { -href => 'javascript:history.back()' }, 'Go back' ), $q->end_html;
+    my $self = shift;
+    my $UI = $self->get_UI;
+    print $self->html_page( $q->h1($UI->{error_h}) . 
+			    $q->p($UI->{error_msg}) .
+			    $q->a( { -href => 'javascript:history.back()' }, 
+				   $UI->{error_back_l} ) 
+			    );
     exit 1;
 }
 
@@ -281,11 +254,13 @@ sub display_look_up_form {
     my $dbh = $self->get_db_handle;
     my $ref_lang = $self->get_languages($dbh);
 
-    my $HTML = $q->start_form( -action => 'look_up.cgi', -method => 'GET' );
+    my $HTML = $q->start_form( -action => 'look_up.cgi',
+			       -method => 'GET' );
     $HTML .= $q->popup_menu(
 			    -name => 'lang',
 			    -values => [ sort keys %{$ref_lang} ],
 			    -labels => $ref_lang,
+			    -style => 'width:100px;',
 			    -default => $self->{lang}
 			    );
     $HTML .= $q->textfield(
@@ -316,13 +291,11 @@ sub display_edit_form {
     
     $info .= join ", ", map {
 	if ($_ eq 'a') {
-	    my $url = sprintf( "look_up.cgi?lang=%s;word=%s", $q->escape($lang), '' );
+	    my $url = sprintf( "look_up.cgi?lang=%s;word=%s", $q->escape($lang), '######' );
 	    my $a_href = qq{href="$url"};
-	    '&lt;' . $q->a( { -href => "#add_tag",
-			      -onClick => "add_tag('<$_ $a_href></$_>')" }, $_ ) . '&gt;';
+	    '&lt;' . $q->a( { -href => "javascript:insert_tags('<$_ $a_href>', '</$_>', '######');" }, $_ ) . '&gt;';
 	} else {
-	    '&lt;' .  $q->a( { -href => "#add_tag",
-			       -onClick => "add_tag('<$_></$_>')" }, $_ ) . '&gt;';
+	    '&lt;' . $q->a( { -href => "javascript:insert_tags('<$_>', '</$_>', '######');" }, $_ ) . '&gt;';
 	}
     } @{$ref_allowed_tags};
     my $HTML = $q->start_form( -action => 'store_desc.cgi',
@@ -331,17 +304,47 @@ sub display_edit_form {
     $HTML .= $q->hidden( -name => 'word_id', -value => $word_id );
     $HTML .= $q->hidden( -name => 'word', -value => $word );
     $HTML .= $q->hidden( -name => 'lang', -value => $lang );
-    $HTML .= $q->p( { -class => 'small' }, $info );
+    $HTML .= $q->p($info );
     $HTML .= $q->textarea(
 			  -name => 'description',
-			  -rows => 15,
-			  -columns => 90,
+			  -rows => 23,
+			  -columns => 80,
 			  -value => $description
 			  );
     $HTML .= $q->p( $q->submit(-value => $UI->{store_desc_b}));
     $HTML .= $q->end_form;
     return $HTML;
 } # sub display_edit_form
+
+# return box for left or right column
+sub display_box {
+    my $self = shift;
+    my %args = @_;
+    my $header = $args{'header'};
+    my $body = $args{'body'};
+
+    my $HTML = $q->table( { summary => "box header",
+			    class => "box_header",
+			    width => "100%" },
+			  $q->Tr(
+				 $q->td( { class => "box_header_left" },
+					 $header ),
+#				 $q->td( { class => "box_header_right" },
+#					 $q->a( { href => "javascript:toggle(\"$header\");" },
+#						$q->img( { src => "/pics/uparrow.png",
+#							   alt => "toggle menu",
+#							   onclick => "javascript:flip_arrow(this);" } )
+#						)
+#					 )
+				 )
+			  );
+    $HTML .= $q->div( { class => 'box',
+			id => $header,
+			style => "display:block;" },
+		      $body );
+    return $HTML;
+}
+
 
 # returns a reference to an array of allowed tags
 sub get_allowed_tags {
@@ -394,7 +397,7 @@ sub get_translations {
     $sth->finish;
     
     unless (@HTML) {
-	push @HTML, $UI->{no_trans_msg};
+	return;
     }
 
     return @HTML;
@@ -406,7 +409,7 @@ sub get_last_edited {
     my %args = @_;
     my $dbh = $args{'dbh'};
     my $lang = $args{'lang'};
-    my $table= $self->get_table_prefix . $lang;
+    my $table = $self->get_table_prefix . $lang;
     my $UI = $self->get_UI;
     my $stmt = "SELECT word_id, word, description FROM $table WHERE description NOT LIKE '' ORDER BY t DESC LIMIT 5";
     my $sth = $dbh->prepare($stmt);
@@ -422,7 +425,7 @@ sub get_last_edited {
     $sth->finish;
     
     unless (@HTML) {
-	push @HTML, '###No words described yet';
+	return;
     }
 
     return @HTML;
@@ -467,6 +470,5 @@ sub trim_ws {
     $string =~ s/\s+$//;
     return $string;
 } # sub trim_ws
-################ Subroutines END #####################
 
 1; # return true

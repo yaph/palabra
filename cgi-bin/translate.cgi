@@ -3,7 +3,7 @@
 # This program is offered without warranty of any kind.
 # See the file LICENSE for redistribution terms.
 use strict;
-use lib qw(/var/www/lib/perl /home/groups/p/pa/palabra/lib);
+use lib qw(/srv/www/lib/perl /home/groups/p/pa/palabra/lib);
 use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use Palabra;
@@ -52,7 +52,7 @@ if ( defined( $q->param('do') ) && $q->param('do') eq 'add_trans' ) { # add a tr
 	$dbh->do( "INSERT INTO $tr_table SET word_id = ?, lang = ?, trans = ?", undef, $word_id, $tr_lang, $trans );
 	
 	# add translation link from target to source
-	$tr_table =~ s/^\w\w_\w\w/$tr_lang/;
+	$tr_table =~ s/_$lang/_$tr_lang/;
 	my $orig_trans = $trans;
 	my $orig_source_lang = $lang;
 	my $orig_target_lang = $tr_lang;
@@ -68,7 +68,6 @@ if ( defined( $q->param('do') ) && $q->param('do') eq 'add_trans' ) { # add a tr
     my $url = sprintf( "translate.cgi?word_id=%d;word=%s;lang=%s", $word_id, $q->escape( $word ), $lang ); 
     print $q->redirect( $url );
 } else {
-    $p->set_nav_links;
     my $page .= display_add_trans();
     print $p->html_page($page);
 }

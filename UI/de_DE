@@ -30,7 +30,6 @@ edit_desc_msg=Nur folgende HTML-Tags können in Beschreibungen verwendet werden:
 last_edit_msg=Zuletzt geändert:
 mail_inst_msg=Alle Felder ausfüllen.
 mail_sent_msg=Danke. Folgende Daten wurden gesendet:
-no_trans_msg=Keine Übersetzungen gefunden.
 no_desc_msg=Keine Beschreibung vorhanden
 no_entries_msg=Bisher keine Einträge mit diesem Anfangsbuchstaben im Wörterbuch.
 entry_total_msg=Gesamtzahl der Einträge:
@@ -47,3 +46,12 @@ name_f=Name:
 email_f=E-Mail:
 subject_f=Betreff:
 msg_f=Nachricht:
+
+# headers
+project_h=Projekt
+recent_h=Aktuell
+
+# error
+error_h=Fehler
+error_msg=Ein Fehler ist aufgetreten.
+error_back_l=Zurück

@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use XML::Parser;
 use URI::Escape;
-use lib qw(/var/www/lib/perl /home/groups/p/pa/palabra/lib);
+use lib qw(/srv/www/lib/perl /home/groups/p/pa/palabra/lib);
 use Palabra;
 use constant MAX_COUNT => 3000;
 

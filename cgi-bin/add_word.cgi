@@ -3,7 +3,7 @@
 # This program is offered without warranty of any kind.
 # See the file LICENSE for redistribution terms.
 use strict;
-use lib qw(/var/www/lib/perl /home/groups/p/pa/palabra/lib);
+use lib qw(/srv/www/lib/perl /home/groups/p/pa/palabra/lib);
 use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use Palabra;
@@ -18,6 +18,8 @@ my $lang = $q->param('lang');
 # new Palabra object
 my $p = Palabra->new( word => $word,
 		      lang => $lang );
+$p->error if $word =~ /^\s*$/;
+
 my $UI = $p->get_UI;
 my $dbh = $p->get_db_handle;
 my $title = '';
@@ -41,7 +43,6 @@ if ( defined( $q->param('do') ) && $q->param('do') eq 'add_word' ) {
 sub display_add_word {
     my $HTML = $q->p($UI->{add_word_msg}, $ref_lang->{$lang});
     $HTML .= $q->start_form( -action => 'add_word.cgi' );
-    $HTML .= $q->hidden( -name => 'word', -value => $word );
     $HTML .= $q->hidden( -name => 'lang', -value => $lang );
     $HTML .= $q->hidden( -name => 'do', -value => 'add_word' );
     $HTML .= $q->textfield(

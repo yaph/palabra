@@ -1,3 +1,6 @@
+# Copyright 2004 Ramiro Gómez.
+# This program is offered without warranty of any kind.
+# See the file LICENSE for redistribution terms.
 package Database;
 use 5.008;
 use strict;
@@ -7,7 +10,7 @@ use DBI;
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw( db_connect );
-our $VERSION = '0.02';
+our $VERSION = '1.1';
 
 my $host_name = "localhost";#"mysql.sourceforge.net";
 my $db_name = "palabra";

@@ -2,7 +2,7 @@
 # Copyright 2003 Ramiro Gómez. All rights reserved!
 # This program is offered without warranty of any kind. See the file LICENSE for redistribution terms.
 use strict;
-use lib qw(/var/www/lib/perl /home/groups/p/pa/palabra/lib);
+use lib qw(/srv/www/lib/perl /home/groups/p/pa/palabra/lib);
 use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use Palabra;
@@ -22,6 +22,10 @@ my $p = Palabra->new( word_id => $word_id,
 		      word => $word,
 		      lang => $lang,
 		      script => $script );
+$p->error unless $word;
+$p->error unless $word_id;
+$p->error unless $lang;
+
 my $table = $p->get_table_prefix . $lang;
 my $UI = $p->get_UI;
 $p->set_HTML_title($UI->{edit_desc_l});
@@ -40,16 +44,9 @@ $p->error unless $ref;
 # date and time
 my ($y, $m, $d, $h, $min, $s) = unpack("A4A2A2A2A2A2", $ref->{t});
 
-# JavaScript code
-my $JavaScript = qq<
-    function add_tag(tag) {
-	window.document.edit_desc.description.value += tag;
-    }
->;
-$p->set_JavaScript($JavaScript);
-$p->set_nav_links;
-
-my $page = $q->p( $UI->{last_edit_msg} . " $d.$m.$y $h:$min:$s" ) .
+my $url = sprintf( "look_up.cgi?word=%s&lang=%s", $q->escape( $word ), $lang  ); 
+my $link = $q->a( { -href => $url }, $word );
+my $page = $link . $q->p( $UI->{last_edit_msg} . " $d.$m.$y $h:$min:$s" ) .
     $p->display_edit_form( word_id => $word_id,
 			   word => $word,
 			   lang => $lang,

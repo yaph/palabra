@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
-use lib qw(/var/www/lib/perl /home/groups/p/pa/palabra/lib);
+use lib qw(/srv/www/lib/perl /home/groups/p/pa/palabra/lib);
 use Palabra;
 
 die "USAGE: $0 language_names\n" unless @ARGV;

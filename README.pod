@@ -1,6 +1,6 @@
-=head1 palabra 1.8
+=head1 palabra 0.8
 
-Copyright 2003 - 2004 Ramiro Gómez. All rights reserved!
+Copyright 2003 - 2005 Ramiro G&oacute;mez. All rights reserved!
 
 This program is offered without warranty of any kind. See the file LICENSE for redistribution terms.
 
@@ -46,8 +46,6 @@ words for all available languages.
 
 =over
 
-=item * Edit form HTML check and JavaScript for inserting tags within text
-
 =item * Modularization
 
 =item * I18N, L10N
@@ -72,13 +70,13 @@ words for all available languages.
 
 =over
 
-=item * add_word.cgi no show_index link
-
-=item * index.cgi top_bar no show_index link
+=item * many error screens
 
 =item * edit_word.cgi descriptions may corrupt layout
 
 =item * show_index.cgi show languages instead of translations
+
+=item * translate.cgi box with translations not visible
 
 =item * contact.cgi show languages instead of translations
 

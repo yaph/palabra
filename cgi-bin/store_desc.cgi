@@ -2,7 +2,7 @@
 # Copyright 2003 Ramiro Gómez. All rights reserved!
 # This program is offered without warranty of any kind. See the file LICENSE for redistribution terms.
 use strict;
-use lib qw(/var/www/lib/perl /home/groups/p/pa/palabra/lib);
+use lib qw(/srv/www/lib/perl /home/groups/p/pa/palabra/lib);
 use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use Palabra;
