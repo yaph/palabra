@@ -1,14 +1,16 @@
-body {background-color:white;margin-left:2%;margin-right:2%;margin-top:2%;margin-bottom:2%;}
+body {background-color:#D0D0D0;margin-left:2%;margin-right:2%;margin-top:2%;margin-bottom:2%;}
 a:link {color:#0000FF;font-family:Arial,sans-serif;}
 a:visited {color:#800080;font-family:Arial,sans-serif;}
 a:active {color:#ff0000;font-family:Arial,sans-serif;}
 a:hover	{color:#ff0000;text-decoration:none;font-family:Arial,sans-serif;}
 h1, h2, h3, h4, h5 {font-family:Arial,sans-serif}
 p {font-family:Arial,sans-serif;font-size:90%;}
-dd, li, td {font-size:100%;font-family:Arial,sans-serif}
+dd, li, td {font-size:90%; font-family:Arial,sans-serif}
 dt, th {font-weight:bold;font-size:100%;color:#000000;font-family:Arial,sans-serif}
-th, td {vertical-align:top;font-size:90%;}
+th, td {vertical-align:top;}
 hr {width:70%;color:black}
+textarea {color:white;background-color:black;}
+input, select { background-color:#AAAAAA; border:2px solid #DDDDDD; font-size:85%; font-family:Verdana,sans-serif; font-weight:bold;}
 
 .center	{text-align:center;}
 .centersmall {text-align:center;font-size:70%;}
@@ -20,10 +22,11 @@ hr {width:70%;color:black}
 .small {font-size:70%;font-family:Arial,sans-serif}
 .white {background-color:white;}
 .yellow {background-color:yellow;}
+.button { background-color:#AAAAAA; color:#000000; border:2px solid #DDDDDD; }
 
 .navbar	{background-color:black;color:white;font-size:90%;font-family:Arial,sans-serif}
 .navbar a:visited {color:silver;font-family:'Nimbus Roman',serif;}
 .navbar a:link {color:lime;font-family:'Nimbus Roman',serif;}
 .navbar a:hover	{color:#ff0000;text-decoration:none;}
-.navbar select {background-color:black;color:white;border-color:black;font-family:sans-serif;font-size:85%}
-.navbar input {border-color:black;font-family:sans-serif;font-size:85%}
+.navbar select {background-color:black;color:white;border-color:black;font-size:85%}
+.navbar input {font-family:sans-serif;font-size:85%}
