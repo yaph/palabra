@@ -18,12 +18,22 @@ my $home = 'palabra';
 
 my $lang = $q->param('lang');
 my $letter = $q->param('letter');
+my $start_pos = $q->param('start_pos');
+my $page_size = 30;
+my $max_rec = $q->param('max_rec');
+
+my @nav_link; # array which holds navigational links
+my $nav_link; # scalar to display navigational links
+my $max_links = 20; # max namuber of page links shown
+
+# regex for matching the first letter ignoring case
+my $regex = '^[' .$letter . uc $letter . ']';
 
 # check values
 die "Entry '$letter' is not accepted" unless $letter =~ m/^[\w]?$/;
 die "Entry '$lang' is not accepted" unless $lang =~ m/^[\w-]+$/;
 
-my $p = Palabra->new( lang => $lang);
+my $p = Palabra->new( lang => $lang );
 $p->{home_url} = sprintf( "index.cgi?lang=%s", $q->escape($lang) );
 
 print $q->header(), $q->start_html( 
@@ -40,7 +50,7 @@ print $q->header(), $q->start_html(
     $q->p( { -class => 'center' }, generate_alphabet() );
 
 # if letter is chosen
-if ($letter) { print $q->h2( $letter ), get_list() };
+if ($letter) { print $q->h2( $letter ), get_list(), $q->p( { -class => 'centersmall' }, $nav_link ) };
 
 print $p->html_footer();
 
@@ -54,9 +64,73 @@ sub generate_alphabet  {
 sub get_list {
     my @list;
     my $dbh = $p->db_connect();
-    my $stmt = "SELECT * FROM $lang WHERE word REGEXP ? AND language = ? ORDER BY word";
+    
+    # initially invoked get number of records matching letter
+    if (!$start_pos) {
+	$start_pos = 0;
+	my $query = "SELECT COUNT(*) FROM $lang WHERE word REGEXP ?";
+	$max_rec = $dbh->selectrow_array($query, undef, $regex);
+	return "No words starting with $letter in this dictionary." unless $max_rec;
+    }
+
+    # generate links for navigating the listing
+    if ($max_rec > $page_size) {
+	
+	# link to previous page
+	if ($start_pos == 0) {
+	    push @nav_link, 'previous';
+	} else {
+	    push @nav_link, generate_nav_link('previous', $start_pos - $page_size);
+	}
+	
+	# links to individual pages
+	my $num_pages = $max_rec / $page_size;
+	
+	if ($num_pages > $max_links) { # more than $max_links pages
+	    my $min = ($start_pos - ($max_links / 2) * $page_size) / $page_size;
+	    
+	    if ($min < 0) {
+		$max_links += $min;
+		$min = 0;
+	    }
+	
+	    my $count = 0;
+	    for (my $i = $min * $page_size; $i < $max_rec && $count < $max_links; $i += $page_size) {
+		my $page_num = int( $i / $page_size ) + 1;
+		$count++;
+		if ($start_pos == $i) { # don't link current page
+		    push @nav_link, $page_num;
+		} else {
+		    push @nav_link, generate_nav_link($page_num, $i);
+		}
+	    }
+	    
+	} else { # less than $max_links pages
+	    for (my $i = 0; $i < $max_rec; $i += $page_size) {
+		my $page_num = int( $i / $page_size ) + 1;
+		if ($start_pos == $i) { # don't link current page
+		    push @nav_link, $page_num;
+		} else {
+		    push @nav_link, generate_nav_link($page_num, $i);
+		}
+	    }
+	}
+	
+	# link to next page
+	if ($start_pos + $page_size >= $max_rec) {
+	    push @nav_link, 'next';
+	} else {
+	    push @nav_link, generate_nav_link('next', $start_pos + $page_size);
+	}
+	
+	# put links in square brackets
+	$nav_link = join " ", map { "[$_]" } @nav_link;
+    }
+    
+    my $limit = "LIMIT $start_pos, $page_size";
+    my $stmt = "SELECT * FROM $lang WHERE word REGEXP ? AND language = ? ORDER BY word $limit";
     my $sth = $dbh->prepare($stmt);
-    $sth->execute('^[' .$letter . uc $letter . ']', $lang);
+    $sth->execute($regex, $lang);
     while (my $ref = $sth->fetchrow_hashref()) {
 	my $info = '';
 	
@@ -69,10 +143,14 @@ sub get_list {
     }
     $sth->finish();
     
-    return $q->ul( $q->li(\@list) );
+    return $q->p( $q->em("Number of entries: $max_rec") ) . $q->ul( $q->li(\@list) );
 } # sub get_list
 
+sub generate_nav_link {
+    my ($label, $start_pos) = @_;
+    my $url = $q->url() . sprintf( "?lang=%s;letter=%s;max_rec=%d;start_pos=%d", $q->escape($lang), $q->escape($letter), $max_rec, $start_pos );
+    return $q->a( { -href => $url }, $q->escapeHTML($label) );
+} # sub generate_nav_link
 __END__
 * Show index: * show only words with descriptions
               * show only words without descriptions
-              * show 20 entries
