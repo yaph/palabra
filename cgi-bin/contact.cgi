@@ -11,7 +11,7 @@ use Palabra;
 $CGI::POST_MAX=1024*100;
 $CGI::DISABLE_UPLOADS = 1;
 
-my $q = CGI->new();
+my $q = CGI->new;
 my $lang = $q->param('lang');
 
 # check value
@@ -21,10 +21,7 @@ print $q->redirect('index.cgi') unless $lang =~ m/^\w\w_\w\w$/;
 my $p = Palabra->new( lang => $lang );
 
 # HTML header information
-my $author = 'Ramiro Gómez, ramiro@rahoo.de';
-my $css = '/style/palabra.css';
-my $home = 'Palabra';
-my $title = 'Contact Form';
+my $title = $p->{UI}->{contact_l};
 
 my @errors;
 my %formdata;
@@ -32,26 +29,25 @@ my %formdata;
 my $home_url = sprintf( "index.cgi?lang=%s", $q->escape($lang) );
 
 # print top of the page
-print $q->header(), $q->start_html( 
+print $q->header, $q->start_html( 
 				    -title => $title,
-				    -meta => { copyright => "copyright 2003 $author" },
-				    -style=>{ src => $css }
+				    -style=>{ src => $p->{css} }
 				    ),
     $q->table( { -width => '100%', -class => 'navbar' },
 	       $q->Tr(
-		      $q->td( { -class => 'left' }, $q->a( { -href => $home_url }, $home ), ' : ',  $title ),
+		      $q->td( { -class => 'left' }, $q->a( { -href => $home_url }, 'Palabra' ), ' : ',  $title ),
 		      $q->td( { -class => 'right' }, $p->display_look_up_form($p->{lang}) )
 		      )
 	       );
     
 # main dispatch logic
-if ( scalar( $q->param() ) > 1 ) {
+if ( scalar( $q->param ) > 1 ) {
     check_form();
     if (@errors) {
 	print $q->ul( $q->li(\@errors) ), display_mail_form();
     } else {
 	send_mail();
-	print $q->p('Thank you. The following data has been sent:'),
+	print $q->p( $q->{UI}->{send_mail_msg} ),
 	$q->ul( $q->li( $formdata{name} ),
 		$q->li( $formdata{email} ),
 		$q->li( $formdata{subject} ),
@@ -62,40 +58,40 @@ if ( scalar( $q->param() ) > 1 ) {
 }
 
 # print footer
-print $p->html_footer();
+print $p->html_footer;
 
 # subroutines
 sub display_mail_form {
-    return $q->p( 'Please fill in all fields!'),
-    $q->start_table( { width => '40%', cellpadding => '4%', style => 'table-layout:fixed' } ),
-    $q->start_form(),
+    return $q->p( $p->{UI}->{mail_inst_msg} ),
+    $q->start_table( { width => '50%', cellpadding => '4%', style => 'table-layout:fixed' } ),
+    $q->start_form,
     $q->hidden( -name => 'lang', -value => $p->{lang} ),
-    $q->Tr( $q->td('Name:'), $q->td( $q->textfield( { name => 'name',
+    $q->Tr( $q->td( $p->{UI}->{name_f}), $q->td( $q->textfield( { name => 'name',
 						      size => 50,
 						      maxlength => 100 }
 						    )
 				     )
 	    ),
-	$q->Tr( $q->td('Email:'), $q->td( $q->textfield( { name => 'email',
+	$q->Tr( $q->td($p->{UI}->{email_f}), $q->td( $q->textfield( { name => 'email',
 							   size => 50,
 							   maxlength => 100 } 
 							 )
 					  )
 		),
-	$q->Tr( $q->td('Subject:'), $q->td( $q->textfield( { name => 'subject',
+	$q->Tr( $q->td($p->{UI}->{subject_f}), $q->td( $q->textfield( { name => 'subject',
 							     size => 50,
 							     maxlength => 100 }
 							   )
 					    )
 		),
-	$q->Tr( $q->td('Message:'), $q->td( $q->textarea( { name => 'message',
+	$q->Tr( $q->td($p->{UI}->{msg_f}), $q->td( $q->textarea( { name => 'message',
 							    rows => 10,
 							    columns => 50 }
 							  )
-					    )
+						   )
 		),
-	$q->Tr( $q->td(), $q->td( $q->submit(), $q->reset() ) ),
-	$q->end_form(), $q->end_table();
+	$q->Tr( $q->td, $q->td( $q->submit( -value => $p->{UI}->{send_mail_b} ), $q->reset( -value => $p->{UI}->{reset_b} ) ) ),
+	$q->end_form, $q->end_table;
 } # display_mail_form
 
 sub check_form {
@@ -136,13 +132,13 @@ sub send_mail {
     my $smtp = Net::SMTP->new('localhost');
     $smtp->mail($formdata{email});
     $smtp->recipient( 'ramiro@rahoo.de', { SkipBad => 1 } );
-    $smtp->data();
+    $smtp->data;
     $smtp->datasend("From: $formdata{name} <$formdata{email}>\n");
     $smtp->datasend("To: web\@ramiro.org\n");
     $smtp->datasend("Subject: $formdata{subject}\n");
     $smtp->datasend("\n");
     $smtp->datasend($formdata{message});
-    my $success = $smtp->dataend();
-    $smtp->quit();
+    my $success = $smtp->dataend;
+    $smtp->quit;
     die "mail could not be sent" unless $success;
 } # sub send_mail

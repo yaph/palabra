@@ -41,14 +41,12 @@ if ( defined( $q->param('do') ) && $q->param('do') eq 'add_word' ) {
 
 sub display_add_word {
     # HTML header information
-    my $author = 'Ramiro Gómez, ramiro@rahoo.de';
     my $css = '/style/palabra.css';
     my $home = 'Palabra';
-    my $title = 'Add word';
+    my $title = $p->{UI}->{add_word_b};
     my $home_url = sprintf( "index.cgi?lang=%s", $q->escape($lang) );
     return $q->header(), $q->start_html( 
 					 -title => $title,
-					 -meta => { copyright => "copyright 2003 $author" },
 					 -style=>{ src => $css }
 					 ),
     $q->table( { -width => '100%', -class => 'navbar' },
@@ -69,7 +67,7 @@ sub display_add_word {
 					 -size => 30,
 					 -default => $word
 					 ),
-			   $q->submit( -value => 'Add word' )
+			   $q->submit( -value => $title )
 			   ),
 			   $q->end_form,
 			   $p->html_footer;

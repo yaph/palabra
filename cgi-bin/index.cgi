@@ -9,7 +9,7 @@ use Palabra;
 
 $CGI::POST_MAX=1024*100;
 $CGI::DISABLE_UPLOADS = 1;
-my $q = CGI->new();
+my $q = CGI->new;
 
 # set language
 my $lang = $q->param('lang');
@@ -20,21 +20,15 @@ my $lang = $q->param('lang');
 # en-us, en;q=0.50
 $lang =~ s/^(\w\w)-(\w\w).*/$1_\U$2/;
 
-# HTML header information
-my $author = 'Ramiro Gómez, ramiro@rahoo.de';
-my $css = '/style/palabra.css';
-my $title = 'Palabra';
-
 # new Palabra object
 my $p = Palabra->new(lang => $lang);
 
-print $q->header(), $q->start_html( 
-				    -title => $title,
-				    -meta => { copyright => "copyright 2003 $author" },
-				    -style=>{ src => $css }
-				    ),
-    $q->div( { -align => 'center', -valign => 'middle' }, $q->h2( $title ),
-	     $p->display_look_up_form(),
+print $q->header, $q->start_html( 
+				  -title => $p->{title},
+				  -style=>{ src => $p->{css} }
+				  ),
+    $q->div( { -align => 'center', -valign => 'middle' }, $q->h2( $p->{title} ),
+	     $p->display_look_up_form,
 	     ),
-    $p->html_footer();
+    $p->html_footer;
 

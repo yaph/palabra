@@ -9,7 +9,7 @@ use Palabra;
 
 $CGI::POST_MAX=1024*100;
 $CGI::DISABLE_UPLOADS = 1;
-my $q = CGI->new();
+my $q = CGI->new;
 
 my $word_id = $q->param('word_id');
 my $word = $q->param('word');
@@ -24,20 +24,20 @@ my $script = $q->url( -relative => 1 );
 # new Palabra object
 my $p = Palabra->new( word_id => $word_id,
 		      word => $word,
-		      title => 'Edit description',
 		      lang => $lang,
 		      script => $script );
+$p->set_HTML_title($p->{UI}->{edit_desc_l});
 
 $word = $p->trim_ws($word);
 print $q->redirect('index.cgi') if $word eq '';
 
 # connect to MySQL database and get information for word.
-my $dbh = $p->db_connect();
+my $dbh = $p->db_connect;
 my $stmt = "SELECT * FROM $lang WHERE word_id = ? AND word = ?";
 my $sth = $dbh->prepare($stmt);
 $sth->execute($word_id, $word);
-my $ref = $sth->fetchrow_hashref();
-$sth->finish();
+my $ref = $sth->fetchrow_hashref;
+$sth->finish;
 $dbh->disconnect;
 
 # word_id doesn't exist
@@ -47,10 +47,10 @@ print $q->redirect('index.cgi') unless $ref;
 my ($y, $m, $d, $h, $min, $s) = unpack("A4A2A2A2A2A2", $ref->{t});
 
 # print HTML edit page for word
-print $p->html_header(),
-    $q->p( "Last edited: $d.$m.$y $h:$min:$s" ),
+print $p->html_header,
+    $q->p( $p->{UI}->{last_edit_msg} . ": $d.$m.$y $h:$min:$s" ),
     $p->display_edit_form( word_id => $word_id,
 			   word => $word,
 			   lang => $lang,
 			   description => $ref->{description} ),
-    $p->html_footer();
+    $p->html_footer;

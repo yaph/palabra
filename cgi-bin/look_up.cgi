@@ -9,7 +9,7 @@ use Palabra;
 
 $CGI::POST_MAX=1024*100;
 $CGI::DISABLE_UPLOADS = 1;
-my $q = CGI->new();
+my $q = CGI->new;
 
 my $lang = $q->param('lang');
 my $word = $q->param('word');
@@ -25,12 +25,12 @@ $word = $p->trim_ws($word);
 print $q->redirect('index.cgi') if $word eq '';
 
 # connect to MySQL database. Check if word exists, if not create new entry.
-my $dbh = $p->db_connect();
+my $dbh = $p->db_connect;
 my $stmt = "SELECT * FROM $lang WHERE word = ?";
 my $sth = $dbh->prepare($stmt);
 $sth->execute($word);
-my $ref = $sth->fetchrow_hashref();
-$sth->finish();
+my $ref = $sth->fetchrow_hashref;
+$sth->finish;
 
 # create new entry for word in corresponding language table
 unless ($ref) {
@@ -38,12 +38,12 @@ unless ($ref) {
     my $url = sprintf( "add_word.cgi?word=%s;lang=%s", $q->escape( $word ), $lang ); 
     print $q->redirect( $url );
 }
-$dbh->disconnect();
+$dbh->disconnect;
 
 # stuff word_id into palabra object
 # !!! todo: write an accessor method !!!
-$p->{word_id} = $ref->{word_id};
-my $desc = $ref->{description} || "Please edit the description!";
+$p->set_word_id( $ref->{word_id} );
+my $desc = $ref->{description} || $p->{UI}->{no_desc_msg};
 
 # print page
-print $p->html_header(), $desc, $p->html_footer();
+print $p->html_header, $desc, $p->html_footer;
